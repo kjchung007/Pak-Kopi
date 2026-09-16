@@ -6,7 +6,7 @@ const source=fs.readFileSync('apps/web/src/components/useEditingPreview.ts','utf
 const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
 let received,listener,posted;const parent={postMessage:m=>posted=m};
 const initial={schema:1,copy:{headline:'Original'},images:{},stores:[],products:[]};
-const context={exports:{},require:name=>name==='@coffee/brand'?{brand:{urls:{admin:'http://localhost:5174'}}}:({useState:x=>[x,x=>received=x],useEffect:f=>f()}),process:{env:{}},location:{protocol:'http:',hostname:'localhost'},window:{parent,addEventListener:(_,f)=>listener=f,removeEventListener(){}}};
+const context={exports:{},require:name=>name==='@coffee/brand/app-url'?{appUrl:(_value,fallback)=>fallback}:name==='@coffee/brand'?{brand:{urls:{admin:'http://localhost:5174'}}}:({useState:x=>[x,x=>received=x],useEffect:f=>f()}),process:{env:{}},location:{protocol:'http:',hostname:'localhost'},window:{parent,addEventListener:(_,f)=>listener=f,removeEventListener(){}}};
 vm.runInNewContext(code,context);context.exports.useEditingPreview(initial,true);
 assert.equal(posted.type,'pak-kopi-preview-ready');
 const edited={...initial,copy:{headline:'Unsaved edit'}};

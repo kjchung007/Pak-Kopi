@@ -16,7 +16,6 @@ export function StoryView({initial,editing,orderUrl}:{initial:SiteDocument;editi
  <article><span>{site.copy["story-13"]}</span><h2>{site.copy["story-14"]}</h2><p>{site.copy["story-15"]}</p></article>
  <article><span>{site.copy["story-16"]}</span><h2>{site.copy["story-17"]}</h2><p>{site.copy["story-18"]}</p></article>
  </section>
- <section className="section story-sources"><p>{site.copy["story-19"]}</p><p>{site.copy["story-20"]}<a href="https://pakopi.orderla.my/menu" target="_blank" rel="noreferrer">{site.copy["story-21"]}</a>{site.copy["story-22"]}<a href="https://www.maybank2u.com.my/iwov-resources/pdf/personal/promotions/2022/FB_merchant-list.pdf" target="_blank" rel="noreferrer">{site.copy["story-23"]}</a>{site.copy["story-24"]}</p></section>
  <section className="closing-cta"><p>{site.copy["story-25"]}</p><h2>{site.copy["story-26"]}<br/>{site.copy["story-27"]}</h2><Link className="button gold" href="/stores">{site.copy["story-28"]}</Link></section>
  </main>;
 }

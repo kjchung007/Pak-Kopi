@@ -21,7 +21,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     <section className="home-intro">
       <h2>{site.copy["home-5"]}<br />{site.copy["home-6"]}<br /><span>{site.copy["home-7"]}</span></h2>
       <p>{site.copy["home-8"]}<br />{site.copy["home-9"]}</p>
-      <Link className="home-link" href="/story">{site.copy["home-10"]}</Link>
     </section>
     <section className="home-brew" aria-labelledby="brew-heading">
       <div className="home-brew-photos">
@@ -31,13 +30,11 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
       <div className="home-brew-copy">
         <h2 id="brew-heading">{site.copy["home-11"]}<br />{site.copy["home-12"]}</h2>
         <p>{site.copy["home-13"]}</p>
-        <Link className="home-link" href="/menu">{site.copy["home-14"]}</Link>
       </div>
     </section>
     <section className="home-drinks">
       <div><h2>{site.copy["home-15"]}</h2><p>{site.copy["home-16"]}</p></div>
       <Image src={site.images.websiteLineupImage || brand.secondaryHeroImage || brand.heroImage} alt="A selection of Pak Kopi iced drinks" width={1448} height={1086} sizes="(max-width: 760px) 90vw, 515px" />
-      <Link className="home-button" href="/menu">{site.copy["home-17"]}</Link>
     </section>
     <section className="home-branches">
       <div className="home-section-title"><h2>{site.copy["home-18"]}</h2><p>{site.copy["home-19"]}</p></div>
@@ -45,7 +42,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
         <div><img src={store.image} alt={`${store.name} storefront`} loading="lazy" width={680} height={510} /></div>
         <h3>{store.name}</h3>
       </Link>)}</div>
-      <Link className="home-link" href="/stores">{site.copy["home-20"]}</Link>
     </section>
     <section className="home-pickup"><h2>{site.copy["home-21"]}</h2><p>{site.copy["home-22"]}</p><a className="home-button" href={orderUrl}>{site.copy["home-23"]}</a></section>
     <p className="home-image-note">{site.copy["home-24"]}</p>

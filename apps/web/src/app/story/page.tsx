@@ -2,7 +2,7 @@ import {getSiteDocument,isDraftPreview} from '@/lib/site-document';
 import {getStores,getProducts,getPublishedPageByPath,orderUrl} from '@/lib/content';
 import {PublishedPage} from '@/components/PublishedPage';
 import {StoryView} from './WebsiteView';
-export const metadata={title:'About Pak Kopi'};
+export const metadata={title:'About Pak Kopi 1969'};
 export default async function Page(){
  const published=await getPublishedPageByPath('/story');
  if(published)return <PublishedPage page={published}/>;

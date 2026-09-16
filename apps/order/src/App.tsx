@@ -2332,8 +2332,8 @@ function OrderDetails({
           <section className="detail-card payment-detail enhanced-payment">
             <h3>Payment details</h3>
             <div className="payment-method-head">
-              <span className={`payment-brand ${order.payment_method ?? "unknown"}`}>{brand.demo ? "DEMO" : order.payment_method}</span>
-              <span><small>Payment method</small><strong>{brand.demo ? (hitpaySandbox ? "HitPay sandbox · no real charge" : "Simulated payment · no real charge") : order.payment_method}</strong></span>
+              <span className={`payment-brand ${order.payment_method ?? "unknown"}`}>{"Online"}</span>
+              <span><small>Payment method</small><strong>{"Online payment"}</strong></span>
               <em className={`payment-status ${order.payment_status}`}>{order.payment_status === "paid" ? "Paid" : order.payment_status === "pending" ? "Verifying Payment" : order.payment_status}</em>
             </div>
             <div className="payment-breakdown">
@@ -2951,7 +2951,7 @@ function ProfilePage({
             </Icon>
             <span>
               <strong>About Us</strong>
-              <small>About this {brand.shortName} demonstration</small>
+              <small>About {brand.shortName}</small>
             </span>
           </span>
           <Icon size={18}>
@@ -3734,7 +3734,7 @@ function CheckoutPage({
               </>
             )}
           </section>
-          <section className="checkout-section payment-method"><div className="checkout-heading"><h2>{hitpaySandbox ? "HitPay sandbox" : "Demo payment"}</h2><span className="sandbox-chip">No real charge</span></div><p className="payment-security">{hitpaySandbox ? "Continue to HitPay test checkout. Use test card details only; no real money is charged." : "Your order is checked and paid in this demonstration only. No bank or eWallet details are needed."}</p></section>
+          <section className="checkout-section payment-method"><div className="checkout-heading"><h2>Payment</h2></div><p className="payment-security">Choose an available payment method at checkout.</p></section>
           <section className="checkout-section cost-summary">
             <h2>Payment summary</h2>
             <div>
@@ -3774,12 +3774,9 @@ function CheckoutPage({
               )
             }
           >
-            {busy ? "Placing demo order…" : paymentMethod === "fpx" && !paymentBank ? "Select a bank to continue" : `${hitpaySandbox ? "Continue to test payment" : "Simulate payment"} · RM ${finalTotal.toFixed(2)}`}
+            {busy ? "Placing order…" : paymentMethod === "fpx" && !paymentBank ? "Select a bank to continue" : `Continue to payment · RM ${finalTotal.toFixed(2)}`}
           </button>
-          <small>
-            This demo simulates your{" "}
-            payment.
-          </small>
+          
         </footer>
       </main>
       {voucherOpen && (

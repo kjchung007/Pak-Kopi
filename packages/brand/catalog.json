@@ -7,7 +7,10 @@
       "address": "Block K, Lot 79, DBKK No. 17, Ground Floor, Sadong Jaya, Karamunsing, 88300 Kota Kinabalu, Sabah",
       "source": "https://www.foodpanda.my/restaurant/mngz/pakopi-1969-sadong-jaya",
       "image": "/brand/cafe-counter.jpg",
-      "imageStatus": "Temporary café reference, not this branch"
+      "imageStatus": "Temporary café reference, not this branch",
+      "latitude": 5.9695625,
+      "longitude": 116.0720625,
+      "coordinatesVerifiedAt": "2026-09-16"
     },
     {
       "id": 2,
@@ -15,7 +18,10 @@
       "address": "No. 14-0, Lot 50, Ground Floor, Block G, Damai Plaza Phase 4, 88300 Kota Kinabalu, Sabah",
       "source": "https://www.foodpanda.my/ms/restaurant/azr2/pakopi-1969-damai",
       "image": "/brand/cafe-interior.jpg",
-      "imageStatus": "Temporary café reference, not this branch"
+      "imageStatus": "Temporary café reference, not this branch",
+      "latitude": 5.96239603,
+      "longitude": 116.09053608,
+      "coordinatesVerifiedAt": "2026-09-16"
     },
     {
       "id": 3,
@@ -23,7 +29,10 @@
       "address": "Lot 16, Ground Floor, Block B, Inanam New Shop House, Jalan Kiansom, Inanam Lama, 88450 Kota Kinabalu, Sabah",
       "source": "https://www.foodpanda.my/restaurant/yqo7/pakopi-1969-inanam?opening_type=pickup",
       "image": "/brand/cafe-counter.jpg",
-      "imageStatus": "Temporary café reference, not this branch"
+      "imageStatus": "Temporary café reference, not this branch",
+      "latitude": 5.9922778,
+      "longitude": 116.1377222,
+      "coordinatesVerifiedAt": "2026-09-16"
     },
     {
       "id": 4,

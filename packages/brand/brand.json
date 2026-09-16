@@ -1,7 +1,7 @@
 {
   "id": "pakopi",
-  "name": "Pak Kopi",
-  "shortName": "Pak Kopi",
+  "name": "Pak Kopi 1969",
+  "shortName": "Pak Kopi 1969",
   "initials": "PK",
   "tagline": "Freshly brewed. Everyday kopi.",
   "description": "Freshly brewed kopi and tea at everyday prices, made for your daily coffee break.",
@@ -10,7 +10,7 @@
   "timezone": "Asia/Kuala_Lumpur",
   "demo": true,
   "paymentMode": "hitpay_sandbox",
-  "notice": "Independent demo \u00b7 No real orders or payments",
+  "notice": "Independent demo · No real orders or payments",
   "logo": "/brand/pakopi-logo.png",
   "icon": "/brand/pakopi-logo.png",
   "productPlaceholder": "/brand/coffee-cream.jpg",
