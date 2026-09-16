@@ -1,0 +1,11 @@
+import {getSiteDocument,previewServer} from '@/lib/site-document';
+import {getStores,getProducts,getPublishedPageByPath,orderUrl} from '@/lib/content';
+import {PublishedPage} from '@/components/PublishedPage';
+import {StoryView} from './WebsiteView';
+export const metadata={title:'About Pak Kopi'};
+export default async function Page(){
+ const published=await getPublishedPageByPath('/story');
+ if(published)return <PublishedPage page={published}/>;
+ const site=await getSiteDocument();
+ return <StoryView initial={{...site,stores:await getStores(),products:await getProducts()}} editing={previewServer} orderUrl={orderUrl}/>;
+}

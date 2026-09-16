@@ -1,0 +1,17 @@
+{
+  "id": "/pakopi-staff",
+  "name": "Pak Kopi staff",
+  "short_name": "Pak Kopi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf6e8",
+  "theme_color": "#20201d",
+  "icons": [
+    {
+      "src": "/brand/pakopi-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

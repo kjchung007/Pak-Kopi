@@ -1,0 +1,76 @@
+{
+  "id": "pakopi",
+  "name": "Pak Kopi",
+  "shortName": "Pak Kopi",
+  "initials": "PK",
+  "tagline": "Freshly brewed. Everyday kopi.",
+  "description": "Freshly brewed kopi and tea at everyday prices, made for your daily coffee break.",
+  "locale": "en-MY",
+  "currency": "MYR",
+  "timezone": "Asia/Kuala_Lumpur",
+  "demo": true,
+  "paymentMode": "hitpay_sandbox",
+  "notice": "Independent demo · No real orders or payments",
+  "logo": "/brand/pakopi-logo.png",
+  "icon": "/brand/pakopi-logo.png",
+  "productPlaceholder": "/brand/coffee-cream.jpg",
+  "storePlaceholder": "/brand/cafe-counter.jpg",
+  "fonts": {
+    "body": "DM Sans, Arial, sans-serif",
+    "display": "Bree Serif, Georgia, serif"
+  },
+  "colors": {
+    "primary": "#20201d",
+    "deep": "#121210",
+    "accent": "#f3cc32",
+    "accentInk": "#806000",
+    "cream": "#faf6e8",
+    "canvas": "#f4f1e8",
+    "ink": "#22221d",
+    "muted": "#68675e",
+    "line": "#ded9c8",
+    "white": "#ffffff"
+  },
+  "urls": {
+    "website": "http://localhost:3000",
+    "order": "http://localhost:5173",
+    "admin": "http://localhost:5174",
+    "staff": "http://localhost:5175"
+  },
+  "contact": {
+    "email": "",
+    "phone": "",
+    "social": []
+  },
+  "heroImage": "/brand/pak-kopi-hero.png",
+  "heroImageAlt": "Three Pak Kopi iced drinks",
+  "menuNote": "Sadong Jaya and Damai menu references come from delivery listings. Inanam menu data is illustrative, awaiting verification.",
+  "locationNote": "Find Pak Kopi in Kota Kinabalu and Sandakan. Pickup previews are available at three Kota Kinabalu branches.",
+  "menuShortNote": "Inanam menu is illustrative.",
+  "showDemoBanner": false,
+  "photoNote": "Pak Kopi drink and Sandakan branch photographs supplied by the project owner. Other reference photographs remain illustrative.",
+  "headline": {
+    "lead": "Freshly brewed.",
+    "accent": "Everyday kopi."
+  },
+  "customerColors": {
+    "accentInk": "#563726",
+    "muted": "#705b4b",
+    "white": "#fffdf6",
+    "deep": "#35251d",
+    "ink": "#35251d",
+    "line": "#d8c9b1",
+    "accent": "#efd064",
+    "primary": "#563726",
+    "cream": "#fff8e9",
+    "canvas": "#fff8e9"
+  },
+  "secondaryHeroImage": "/brand/pak-kopi-drinks.png",
+  "HeroImage3": "/brand/Pak Kopi Hero images 3.jpg",
+  "HeroImage4": "/brand/Pak Kopi Hero images 4.jpg",
+  "HeroImage5": "/brand/Pak Kopi Hero images 5.jpg",
+  "homeBannerImage": "/brand/home-coffee-concept.png",
+  "websiteLineupImage": "/brand/drinks-beans-restored.png",
+  "menuHeroImage": "/brand/menu-kopi-isolated.png",
+  "aboutHeroImage": "/brand/about-wide-branded.webp"
+}

@@ -1,0 +1,24 @@
+insert into auth.users(id,email,email_confirmed_at) values('30000000-0000-0000-0000-000000000001','editor@example.test',now());
+insert into public.staff(user_id,role) values('30000000-0000-0000-0000-000000000001','global_admin');
+select set_config('request.jwt.claim.sub','30000000-0000-0000-0000-000000000001',false);
+select set_config('request.jwt.claims','{"role":"authenticated"}',false);
+set role authenticated;
+do $$declare base jsonb:='{"schema":1,"copy":{"home-1":"Original"},"images":{"hero":"/brand/test.png"},"stores":[],"products":[]}'; r jsonb;link uuid;ver bigint;begin
+ r:=public.website_workspace_action('load',base);
+ if r->'content'<>base then raise exception 'Draft baseline differs';end if;
+ r:=public.website_workspace_action('save',jsonb_set(base,'{copy,home-1}','"Draft"'),1);
+ if exists(select 1 from public.website_public) then raise exception 'Draft became public';end if;
+ link:=(public.website_workspace_action('preview')->>'token')::uuid;
+ if public.read_website_preview(link)->'copy'->>'home-1'<>'Draft' then raise exception 'Preview incorrect';end if;
+ r:=public.website_workspace_action('publish',base,2);
+ if (select content->'copy'->>'home-1' from public.website_public)<>'Draft' then raise exception 'Publish failed';end if;
+ ver:=(r->'versions'->0->>'id')::bigint;
+ r:=public.website_workspace_action('restore',null,3,ver);
+ if r->'content'<>base then raise exception 'Restore did not recover original';end if;
+ if (select content->'copy'->>'home-1' from public.website_public)<>'Draft' then raise exception 'Restore modified live';end if;
+ perform public.website_workspace_action('revoke_previews');
+ if public.read_website_preview(link) is not null then raise exception 'Revoked preview still works';end if;
+end$$;
+reset role;
+select set_config('request.jwt.claim.sub','',false);
+select set_config('request.jwt.claims','{}',false);

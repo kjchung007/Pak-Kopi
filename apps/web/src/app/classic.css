@@ -1,0 +1,11 @@
+/* Identity only. Layout, cards and sections are inherited from globals.css. */
+:root{--muted:var(--brand-muted);--line:var(--brand-line);font-synthesis:weight}
+.nav-order{display:flex;align-items:center;justify-content:center;gap:8px}
+.site-header{background:var(--brand-deep);border-bottom:0;backdrop-filter:none}
+.menu-toggle{color:var(--brand-cream)}
+.site-brand img,.site-footer img{object-fit:contain;border-radius:0}
+
+/* Supplied transparent drink images: preserve the whole cup silhouette. */
+.hero-stage>img{object-fit:contain;border-radius:0;height:auto}
+.double-image img,.sarawak-field img{object-fit:contain;padding:clamp(20px,4vw,60px)}
+.store-list article>img{object-fit:contain;background:var(--brand-deep)}

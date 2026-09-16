@@ -1,0 +1,17 @@
+{
+  "id": "/pakopi-web",
+  "name": "Pak Kopi web",
+  "short_name": "Pak Kopi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff8e9",
+  "theme_color": "#563726",
+  "icons": [
+    {
+      "src": "/brand/pakopi-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

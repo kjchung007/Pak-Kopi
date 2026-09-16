@@ -1,0 +1,17 @@
+{
+  "name": "@coffee/brand",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./theme.css": "./theme.css",
+    "./customer-theme.css": "./customer-theme.css",
+    "./catalog": "./catalog.json",
+    "./website": "./src/website.ts",
+    "./demo-client": "./src/demo-client.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.112.3"
+  }
+}

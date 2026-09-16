@@ -1,0 +1,70 @@
+/* Homepage-only visual direction: white, black and restrained light coffee. */
+.pak-home{--home-ink:#161616;--home-muted:#595653;--home-coffee:#80634f;--home-tint:#f4f1ed;color:var(--home-ink);background:#fff;font-family:var(--brand-body)}
+.pak-home h1,.pak-home h2,.pak-home h3{font-family:var(--brand-body);font-weight:400;letter-spacing:-.035em;text-wrap:balance}
+.pak-home h2{font-size:clamp(30px,3.3vw,48px);line-height:1.2;margin-bottom:22px}
+.pak-home p{color:var(--home-muted);font-size:17px;line-height:1.65}
+.pak-home a:focus-visible,.home-header a:focus-visible,.home-header button:focus-visible,.home-footer a:focus-visible{outline:2px solid #80634f;outline-offset:6px}
+.pak-home ::selection{background:#d8c7b9;color:#161616}
+.site-header.home-header{height:108px;padding-inline:6vw;background:#fff;color:#161616;box-shadow:none;border:0}
+.home-header .site-brand img{width:65px;height:76px}
+.home-header .site-brand strong{font-family:var(--brand-body);font-size:22px;font-weight:600;letter-spacing:-.03em;color:#161616}
+.home-header .site-brand small{display:none}
+.home-header nav{gap:36px}
+.home-header nav>a:not(.nav-order){color:#161616;font-size:16px}
+.home-header nav>a:not(.nav-order)::after{height:1px;background:#80634f;bottom:-5px}
+.home-header .nav-order{background:#161616;color:#fff;border-radius:3px;padding-inline:22px;font-size:14px;font-weight:500}
+.home-header .menu-toggle{color:#161616}
+.home-button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:13px 27px;background:#161616;color:#fff;border:1px solid #161616;border-radius:3px;font-size:14px;line-height:1.3;transition:background .18s}
+.home-button:hover,.home-header .nav-order:hover{background:#80634f;color:#fff;border-color:#80634f}
+.home-link{display:inline-flex;align-items:center;min-height:44px;padding-block:9px;border-bottom:1px solid #80634f;font-size:15px;color:#161616}
+.home-link:hover{color:#80634f}
+.home-banner{position:relative;isolation:isolate;min-height:590px;height:min(48vw,700px);background:#faf9f6;overflow:hidden}
+.home-banner .home-banner-image{left:auto!important;width:72%!important;object-fit:cover;object-position:right center;z-index:-1}
+.home-banner-copy{padding:clamp(110px,12vw,185px) 6vw 80px;max-width:650px}
+.home-banner h1{font-size:clamp(42px,4.4vw,68px);line-height:1.1;margin:0 0 23px}
+.home-banner-copy p{max-width:310px;margin:0 0 30px}
+.home-intro{padding:125px 24px 130px;text-align:center}
+.home-intro h2{font-size:clamp(34px,3.6vw,52px);line-height:1.3}
+.home-intro h2 span{color:var(--home-coffee)}
+.home-intro p{margin:26px 0 23px}
+.home-brew{background:var(--home-tint);padding:80px 24px 90px;text-align:center}
+.home-brew-photos{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:784px;margin:0 auto 55px}
+.home-brew-photos img{width:100%;height:auto;aspect-ratio:1;object-fit:cover}
+.home-brew-copy p{max-width:550px;margin:0 auto 20px}
+.home-drinks{padding:110px 24px;text-align:center}
+.home-drinks img{width:min(100%,515px);height:auto;margin:40px auto 32px;object-fit:contain}
+.home-branches{padding:20px max(24px,8vw) 110px;text-align:center}
+.home-section-title{margin-bottom:45px}
+.home-section-title h2{margin-bottom:16px}
+.home-branch-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;max-width:1060px;margin:0 auto 25px;text-align:left}
+.home-branch>div{overflow:hidden;background:var(--home-tint)}
+.home-branch img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;transition:transform .3s}
+.home-branch:hover img{transform:scale(1.025)}
+.home-branch h3{font-size:22px;margin:19px 0 12px}
+.home-pickup{background:var(--home-tint);text-align:center;padding:85px 24px}
+.home-pickup p{margin-bottom:28px}
+.pak-home .home-image-note{margin:0;padding:22px 24px;text-align:center;font-size:11px;color:#69635e}
+.site-footer.home-footer{background:#fff;color:#161616;border-top:1px solid #eae7e3;padding:55px 6vw 28px}
+.home-footer>div strong{font-family:var(--brand-body);font-size:24px;font-weight:400;color:#161616}
+.home-footer>div p,.home-footer small{color:#595653}
+.home-footer nav a{color:#161616}
+@media(min-width:761px) and (max-width:1100px){.home-header nav{gap:20px}.home-header .site-brand strong{display:none}.home-banner-copy{max-width:47%;padding-top:125px}.home-banner h1{font-size:44px}.home-banner .home-banner-image{width:68%!important;object-position:65% center}}
+@media(max-width:760px){
+ .site-header.home-header{height:82px;padding-inline:20px}
+ .home-header .site-brand{gap:10px}.home-header .site-brand img{width:47px;height:60px}.home-header .site-brand strong{font-size:20px}
+ .home-header nav{top:82px;left:0;right:0;padding:16px 20px 24px;border:0;border-bottom:1px solid #eae7e3;border-radius:0;background:#fff;box-shadow:none;gap:6px}
+ .home-header nav>a:not(.nav-order){color:#161616;background:transparent;font-size:16px}
+ .home-header nav>a:not(.nav-order):hover,.home-header nav>a.active{background:#f4f1ed}
+ .home-header .nav-order{margin-top:10px}.home-header~.nav-backdrop{top:82px;background:rgba(0,0,0,.2);backdrop-filter:none}
+ .home-banner{height:auto;min-height:0;padding-bottom:340px}
+ .home-banner-copy{max-width:none;text-align:center;padding:48px 24px 25px}
+ .home-banner h1{font-size:43px;line-height:1.1;margin-bottom:17px}
+ .home-banner-copy p{max-width:260px;margin:0 auto 23px;font-size:15px}
+ .home-banner .home-banner-image{top:auto!important;bottom:0!important;width:100%!important;height:330px!important;object-fit:cover;object-position:right center}
+ .home-intro{padding:75px 24px 80px}.home-intro h2{font-size:34px}.pak-home p{font-size:15px}
+ .home-brew{padding:35px 20px 65px}.home-brew-photos{gap:12px;margin-bottom:35px}.home-brew h2{font-size:30px}
+ .home-drinks{padding:75px 20px}.home-drinks img{margin:30px auto}.home-drinks h2{max-width:270px;margin-inline:auto}
+ .home-branches{padding:0 20px 65px}.home-section-title{margin-bottom:30px}.home-branch-grid{grid-template-columns:1fr;gap:25px}.home-branch h3{font-size:21px}
+ .home-pickup{padding:65px 24px}.site-footer.home-footer{padding:40px 24px 24px}.home-footer>div strong{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){.home-branch img,.home-button{transition:none}.home-branch:hover img{transform:none}}

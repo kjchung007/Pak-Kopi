@@ -1,0 +1,288 @@
+{
+  "verifiedAt": "2026-09-12",
+  "stores": [
+    {
+      "id": 1,
+      "name": "Sadong Jaya",
+      "address": "Block K, Lot 79, DBKK No. 17, Ground Floor, Sadong Jaya, Karamunsing, 88300 Kota Kinabalu, Sabah",
+      "source": "https://www.foodpanda.my/restaurant/mngz/pakopi-1969-sadong-jaya",
+      "image": "/brand/cafe-counter.jpg",
+      "imageStatus": "Temporary café reference, not this branch"
+    },
+    {
+      "id": 2,
+      "name": "Damai",
+      "address": "No. 14-0, Lot 50, Ground Floor, Block G, Damai Plaza Phase 4, 88300 Kota Kinabalu, Sabah",
+      "source": "https://www.foodpanda.my/ms/restaurant/azr2/pakopi-1969-damai",
+      "image": "/brand/cafe-interior.jpg",
+      "imageStatus": "Temporary café reference, not this branch"
+    },
+    {
+      "id": 3,
+      "name": "Inanam",
+      "address": "Lot 16, Ground Floor, Block B, Inanam New Shop House, Jalan Kiansom, Inanam Lama, 88450 Kota Kinabalu, Sabah",
+      "source": "https://www.foodpanda.my/restaurant/yqo7/pakopi-1969-inanam?opening_type=pickup",
+      "image": "/brand/cafe-counter.jpg",
+      "imageStatus": "Temporary café reference, not this branch"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Kopi Ping Kaw",
+      "priceCents": 720,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-cream.jpg",
+      "imageSource": "https://unsplash.com/photos/clear-drinking-glass-with-black-liquid-o05n1Ey79fY",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 2,
+      "name": "Teh Ping Kaw",
+      "priceCents": 720,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 3,
+      "name": "Crystal Ping Kopi Magic",
+      "priceCents": 870,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-iced.jpg",
+      "imageSource": "https://unsplash.com/id/foto/fotografi-makro-menjatuhkan-es-batu-dalam-cangkir-BIeXZhg_7sw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 4,
+      "name": "Teh Hong Kong Style",
+      "priceCents": 720,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 5,
+      "name": "Iced Cocoa",
+      "priceCents": 870,
+      "category": "Chocolate",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/chocolate.jpg",
+      "imageSource": "https://unsplash.com/photos/hot-chocolate-on-cup-ASqklsopvdw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 6,
+      "name": "Refreshing Lemon Tea",
+      "priceCents": 870,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 7,
+      "name": "Traditional 3 Layer Milk Kopi",
+      "priceCents": 1020,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-cream.jpg",
+      "imageSource": "https://unsplash.com/photos/clear-drinking-glass-with-black-liquid-o05n1Ey79fY",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 8,
+      "name": "Traditional 3 Layer Milk Tea",
+      "priceCents": 1020,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 9,
+      "name": "Iced Cham",
+      "priceCents": 720,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-iced.jpg",
+      "imageSource": "https://unsplash.com/id/foto/fotografi-makro-menjatuhkan-es-batu-dalam-cangkir-BIeXZhg_7sw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 10,
+      "name": "Traditional Mocha Ping",
+      "priceCents": 1160,
+      "category": "Chocolate",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/chocolate.jpg",
+      "imageSource": "https://unsplash.com/photos/hot-chocolate-on-cup-ASqklsopvdw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 11,
+      "name": "Kopi Masin Kaw",
+      "priceCents": 870,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-glass.jpg",
+      "imageSource": "https://unsplash.com/photos/a-glass-of-iced-coffee-with-a-spoon-in-it-ZWAiv50W3QA",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 12,
+      "name": "Thai Tea",
+      "priceCents": 870,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 13,
+      "name": "White Kopi Kaw",
+      "priceCents": 870,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-cream.jpg",
+      "imageSource": "https://unsplash.com/photos/clear-drinking-glass-with-black-liquid-o05n1Ey79fY",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 14,
+      "name": "Special Leong Foon Susu",
+      "priceCents": 850,
+      "category": "Specials",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-glass.jpg",
+      "imageSource": "https://unsplash.com/photos/a-glass-of-iced-coffee-with-a-spoon-in-it-ZWAiv50W3QA",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 15,
+      "name": "Red Bean Ice",
+      "priceCents": 990,
+      "category": "Specials",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-iced.jpg",
+      "imageSource": "https://unsplash.com/id/foto/fotografi-makro-menjatuhkan-es-batu-dalam-cangkir-BIeXZhg_7sw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 16,
+      "name": "Green Thai Tea",
+      "priceCents": 1020,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 17,
+      "name": "Iced Gula Apong Tea",
+      "priceCents": 1020,
+      "category": "Tea",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/tea-lemon.jpg",
+      "imageSource": "https://unsplash.com/photos/glass-of-iced-tea-with-lemon-and-mint-fDWtPLCPgKU",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 18,
+      "name": "Iced Caramel Kopi",
+      "priceCents": 1020,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-iced.jpg",
+      "imageSource": "https://unsplash.com/id/foto/fotografi-makro-menjatuhkan-es-batu-dalam-cangkir-BIeXZhg_7sw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 19,
+      "name": "Iced Gula Apong Kopi",
+      "priceCents": 1020,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-cream.jpg",
+      "imageSource": "https://unsplash.com/photos/clear-drinking-glass-with-black-liquid-o05n1Ey79fY",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 20,
+      "name": "Iced Hazelnut Kopi",
+      "priceCents": 1020,
+      "category": "Local Kopi",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/coffee-glass.jpg",
+      "imageSource": "https://unsplash.com/photos/a-glass-of-iced-coffee-with-a-spoon-in-it-ZWAiv50W3QA",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    },
+    {
+      "id": 21,
+      "name": "Iced Strawberry Chocolate Drink",
+      "priceCents": 1350,
+      "category": "Chocolate",
+      "description": "Delivery-menu reference price. Demo customisations are illustrative.",
+      "image": "/brand/chocolate.jpg",
+      "imageSource": "https://unsplash.com/photos/hot-chocolate-on-cup-ASqklsopvdw",
+      "imageStatus": "Temporary stock reference, not the actual product"
+    }
+  ],
+  "menus": {
+    "1": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "2": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "3": [
+      1,
+      2,
+      5,
+      9,
+      12
+    ]
+  },
+  "notes": "Inanam menu and prices are illustrative; its public listing did not expose a menu. All demo hours are 24h for presentations. No real orders."
+}

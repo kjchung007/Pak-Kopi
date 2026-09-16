@@ -1,0 +1,60 @@
+/* Identity only. Preserve the original ordering layouts and component styling. */
+:root{font-synthesis:weight}
+.brand-mark.brand-image{border:0;object-fit:contain;background:transparent;border-radius:0}
+.auth-logo{display:block;width:76px;height:86px;object-fit:contain;margin:0 auto 18px}
+.category-symbol{color:var(--brand-primary)}
+
+/* Ordering identity: retain component sizes, layouts and all app behavior. */
+:root{--brand-primary:#161616;--brand-deep:#242424;--brand-accent:#e8ddd3;--brand-accentInk:#80634f;--brand-cream:#faf9f7;--brand-canvas:#f3f3f2;--brand-ink:#161616;--brand-muted:#66615d;--brand-line:#e3dfdb;--brand-white:#fff;--brand-display:'DM Sans',Arial,sans-serif}
+.app-shell{box-shadow:0 16px 48px rgba(0,0,0,.07)}
+.topbar{background:#fff;color:#161616;border-bottom:1px solid var(--line)}
+.wordmark strong,.icon-button{color:#161616}
+.wordmark small{color:#66615d}
+.home-welcome,.simple-page>header,.checkout-page>header{background:#fff;color:#161616}
+.home-welcome p,.home-welcome small,.simple-page>header p,.simple-page>header small{color:#66615d}
+.home-welcome::after{color:#e8e4df}
+.home-avatar{background:#f1ece6;color:#161616;border-color:#fff}
+.order-context{background:#fff}
+.wait-strip{background:#f4f1ed;color:#161616}
+.wait-strip strong{color:#80634f}
+.wait-strip .status-dot{background:#80634f;box-shadow:none}
+.promo-banner{background:#f4f1ed;color:#161616;box-shadow:none}
+.promo-banner span,.promo-banner p{color:#66615d}
+.topbar .header-rewards,.topbar .icon-button{color:#161616}
+.rewards-hero{background:#242424;box-shadow:none}
+.rewards-entry,.points-balance,.stamp-balance{background:#f4f1ed;color:#161616;box-shadow:none;border-color:#e3dfdb}
+.points-balance p,.points-balance small,.stamp-balance p,.stamp-balance small,.rewards-entry small{color:#66615d}
+.points-balance strong,.stamp-balance strong,.rewards-entry strong{color:#161616}
+.category-rail button.active{background:#f4f1ed;color:#161616}
+.bottom-nav button.active{color:#161616}
+.bottom-nav button.active::after,.category-rail button.active::before{background:#80634f}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #80634f;outline-offset:3px}
+::-webkit-scrollbar-track{background:#f3f3f2}
+::-webkit-scrollbar-thumb{background:#aaa29b;border-color:#f3f3f2}
+.home-stamp{background:#f1ece6;color:#161616}
+.welcome-voucher{color:#80634f}
+.welcome-voucher>small{color:#66615d!important}
+.home-reward-summary{background:#f4f1ed;color:#161616;border-color:#e3dfdb;box-shadow:none}
+.reward-summary-mark{background:#e8ddd3;color:#80634f}
+.reward-summary-copy>small,.reward-summary-copy b{color:#66615d}
+.checkout-page>header>button{color:#161616}
+
+.checkout-page>header small{color:#80634f}
+.wait-note{color:#66615d}
+.wait-strip .pulse-dot{background:#80634f;box-shadow:none}
+.bottom-nav button{color:#66615d}
+
+/* Warm honey-oat welcome panel; retain the existing home layout. */
+.home-welcome{background:#ead8bb;color:#161616}
+.home-welcome::after{content:none;display:none}
+.home-welcome p,.home-welcome small{color:#594c3d}
+.home-page{background:#faf8f3}
+
+/* Coffee-brown actions and member panels; retain white page surfaces. */
+:root{--brand-primary:#694733;--brand-deep:#513725}
+.rewards-hero{background:#694733}
+.stamp-balance{background:#ead8bb;color:#35271d}
+.stamp-track>span,.stamp-track>span.filled{border:0;border-radius:0;background:transparent;box-shadow:none}
+.stamp-track>span:not(.filled) img{opacity:.2;filter:grayscale(1)}
+.stamp-track>span.filled img{opacity:1;filter:none}
+.stamp-heading>span,.stamp-heading>strong,.stamp-heading>small,.stamp-balance p{color:#513725}

@@ -1,0 +1,39 @@
+{
+  "name": "coffee-shop-demo",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:website-preview": "node scripts/start-website-preview.mjs",
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:customer": "pnpm --dir apps/order dev",
+    "dev:admin": "pnpm --dir apps/admin dev",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "brand:sync": "node scripts/sync-brand.mjs",
+    "demo:configure": "node scripts/configure-local.mjs",
+    "demo:server": "node scripts/demo-server.mjs",
+    "demo:reset": "node scripts/reset-demo.mjs",
+    "test:database": "node scripts/test-database.mjs",
+    "starter:export": "node scripts/export-starter.mjs",
+    "seed:generate": "node scripts/seed-catalog.mjs",
+    "demo:apps": "node scripts/start-apps.mjs",
+    "test:http": "node scripts/test-http.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "@playwright/test": "^1.63.0",
+    "eslint": "9.39.5",
+    "oxlint": "1.79.0",
+    "supabase": "2.115.0",
+    "turbo": "2.10.11",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

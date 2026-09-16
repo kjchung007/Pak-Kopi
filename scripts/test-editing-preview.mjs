@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+import assert from 'node:assert/strict';
+const source=fs.readFileSync('apps/web/src/components/useEditingPreview.ts','utf8');
+const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+let received,listener,posted;const parent={postMessage:m=>posted=m};
+const initial={schema:1,copy:{headline:'Original'},images:{},stores:[],products:[]};
+const context={exports:{},require:()=>({useState:x=>[x,x=>received=x],useEffect:f=>f()}),process:{env:{}},location:{protocol:'http:',hostname:'localhost'},window:{parent,addEventListener:(_,f)=>listener=f,removeEventListener(){}}};
+vm.runInNewContext(code,context);context.exports.useEditingPreview(initial,true);
+assert.equal(posted.type,'pak-kopi-preview-ready');
+const edited={...initial,copy:{headline:'Unsaved edit'}};
+listener({source:parent,origin:'http://malicious.example',data:{type:'pak-kopi-edit-preview',content:edited}});
+assert.equal(received,initial);
+listener({source:parent,origin:'http://localhost:5174',data:{type:'pak-kopi-edit-preview',content:edited}});
+assert.equal(received,edited);
+listener=undefined;context.exports.useEditingPreview(initial,false);assert.equal(listener,undefined);
+console.log('Instant preview: trusted edits applied, foreign origin rejected, live listener disabled.');

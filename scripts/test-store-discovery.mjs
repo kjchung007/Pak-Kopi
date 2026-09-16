@@ -1,0 +1,16 @@
+import {strict as assert} from 'node:assert';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const context={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync('apps/order/src/storeDiscovery.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,context);
+const {discoverStores,distanceKm}=context.exports;
+const near={id:1,name:'Nearby',address:'Sabah',state:'Sabah',city:'KK',latitude:6,longitude:116,accepting_pickup:true};
+const far={...near,id:2,name:'Far branch',state:'Selangor',latitude:3,longitude:101};
+const paused={...near,id:3,accepting_pickup:false};
+const unmapped={...near,id:4,latitude:null,longitude:null};const p={latitude:6,longitude:116};
+assert.equal(distanceKm(p,near),0);assert.equal(distanceKm(p,unmapped),null);
+assert.equal(discoverStores([near,far,paused,unmapped],p,'','nearby').length,1);
+assert.equal(discoverStores([near,far],p,'far','nearby')[0].store.id,2);
+assert.equal(discoverStores([near,far,paused],null,'','Sabah').length,1);
+assert.equal(discoverStores([near,far,paused],null,'','').length,2);
+console.log('Passed: distance, unknown coordinates, paused filtering, region filtering, nationwide search.');
