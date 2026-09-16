@@ -19,3 +19,5 @@ Verification: type checks and website/admin production builds passed. Database t
 
 ## Instant editor preview
 Text, image and branch changes now appear immediately in the embedded preview before saving. They remain in browser memory. Save draft persists them and updates the separate-device preview; publishing is still a separate action. The public website does not listen for editing messages. Hosted preview instances can set NEXT_PUBLIC_ADMIN_URL to the exact trusted admin origin (local default: same hostname, port 5174).
+
+Hosted setup: the production editor uses https://pakkopi.vercel.app/preview with expiring access links. No separate preview deployment is needed. Keep WEBSITE_DRAFT_PREVIEW unset on Vercel. Port 3001 remains for local development only.
