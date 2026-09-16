@@ -1,3 +1,4 @@
+import {appUrl} from '@coffee/brand/app-url';
 import { brand } from '@coffee/brand';
 import catalog from '@coffee/brand/catalog';
 import {getSiteDocument} from './site-document';
@@ -66,5 +67,5 @@ export async function getPublishedPageByPath(routePath:string): Promise<WebsiteP
   return { id:row.id,title:row.title,slug:row.slug,routePath:row.route_path,seoTitle:row.seo_title,seoDescription:row.seo_description,sections:Array.isArray(row.published_content?.sections)?row.published_content.sections:[] };
 }
 
-export const orderUrl = process.env.NEXT_PUBLIC_ORDER_APP_URL || brand.urls.order;
+export const orderUrl = appUrl(process.env.NEXT_PUBLIC_ORDER_APP_URL,brand.urls.order,process.env.NODE_ENV==='development');
 export const money = (cents:number) => `RM ${(cents / 100).toFixed(2)}`;

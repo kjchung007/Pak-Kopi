@@ -1,4 +1,5 @@
 'use client';
+import {appUrl} from '@coffee/brand/app-url';
 import {brand} from '@coffee/brand';
 import {useEffect,useState} from 'react';
 import type {SiteDocument} from '@coffee/brand/website';
@@ -8,7 +9,7 @@ export function useEditingPreview(initial:SiteDocument,enabled:boolean){
  useEffect(()=>setSite(initial),[initial]);
  useEffect(()=>{
   if(!enabled||window.parent===window)return;
-  const origin=process.env.NEXT_PUBLIC_ADMIN_URL||(process.env.NODE_ENV==='development'?`${location.protocol}//${location.hostname}:5174`:brand.urls.admin);
+  const origin=appUrl(process.env.NEXT_PUBLIC_ADMIN_URL,process.env.NODE_ENV==='development'?`${location.protocol}//${location.hostname}:5174`:brand.urls.admin,process.env.NODE_ENV==='development');
   function receive(event:MessageEvent){
    if(event.source!==window.parent||event.origin!==origin||event.data?.type!=='pak-kopi-edit-preview')return;
    const content=event.data.content as SiteDocument;

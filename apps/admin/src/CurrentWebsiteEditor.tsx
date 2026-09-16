@@ -1,3 +1,4 @@
+import {appUrl} from '@coffee/brand/app-url';
 import {brand} from '@coffee/brand';
 import {useEffect,useState,useRef} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
@@ -15,8 +16,8 @@ export function CurrentWebsiteEditor({client,onExit}:{client:SupabaseClient;onEx
  const previewFrame=useRef<HTMLIFrameElement>(null);
  const past=useRef<SiteDocument[]>([]),future=useRef<SiteDocument[]>([]),savedDoc=useRef<SiteDocument|null>(null);
  const host=window.location.hostname;
- const live=(import.meta.env.VITE_WEBSITE_URL||(import.meta.env.DEV?`${location.protocol}//${host}:3000`:brand.urls.website)).replace(/\/$/,'').replace('localhost',host);
- const preview=(import.meta.env.VITE_WEBSITE_PREVIEW_URL||(import.meta.env.DEV?`${location.protocol}//${host}:3001`:live+'/preview')).replace(/\/$/,'').replace('localhost',host);
+ const live=appUrl(import.meta.env.VITE_WEBSITE_URL,import.meta.env.DEV?`${location.protocol}//${host}:3000`:brand.urls.website,import.meta.env.DEV).replace('localhost',host);
+ const preview=appUrl(import.meta.env.VITE_WEBSITE_PREVIEW_URL,import.meta.env.DEV?`${location.protocol}//${host}:3001`:live+'/preview',import.meta.env.DEV).replace('localhost',host);
  const path=pages.find(p=>p[0]===page)![2];
  const previewLink=token?`${preview}/draft-access?token=${token}&page=${encodeURIComponent(path)}&v=${revision}`:'';
  function sendPreview(){if(doc)previewFrame.current?.contentWindow?.postMessage({type:'pak-kopi-edit-preview',content:doc},new URL(preview).origin);}

@@ -9,7 +9,8 @@
     "./customer-theme.css": "./customer-theme.css",
     "./catalog": "./catalog.json",
     "./website": "./src/website.ts",
-    "./demo-client": "./src/demo-client.ts"
+    "./demo-client": "./src/demo-client.ts",
+    "./app-url": "./src/app-url.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.3"

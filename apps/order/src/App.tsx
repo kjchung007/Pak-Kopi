@@ -1,3 +1,4 @@
+import {appUrl} from '@coffee/brand/app-url';
 import {StoreCards} from './StoreCards';
 import { brand } from '@coffee/brand';
 import {
@@ -20,8 +21,8 @@ import { useStore, type Store } from "./StoreContext";
 const hitpaySandbox = brand.paymentMode === 'hitpay_sandbox' && import.meta.env.VITE_LOCAL_DEMO !== 'true';
 
 const customerWebsiteUrl = (() => {
-  const url = new URL(import.meta.env.VITE_WEBSITE_URL || brand.urls.website);
-  if (["localhost", "127.0.0.1"].includes(url.hostname)) url.hostname = window.location.hostname;
+  const url = new URL(appUrl(import.meta.env.VITE_WEBSITE_URL,brand.urls.website,import.meta.env.DEV));
+  if (import.meta.env.DEV && ["localhost", "127.0.0.1"].includes(url.hostname)) url.hostname = window.location.hostname;
   return url.origin;
 })();
 

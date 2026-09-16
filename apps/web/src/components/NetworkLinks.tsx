@@ -1,4 +1,5 @@
 "use client";
+import {brand} from '@coffee/brand';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -9,6 +10,11 @@ export function NetworkLinks(){
  useEffect(()=>{
   const rewrite=(anchor:HTMLAnchorElement)=>{
    const url=new URL(anchor.href,location.href);
+   if(process.env.NODE_ENV!=='development'){
+    const targets:Record<string,string>={'3000':brand.urls.website,'3001':brand.urls.website+'/preview','5173':brand.urls.order,'5174':brand.urls.admin,'5175':brand.urls.staff};
+    if(targets[url.port]){const target=new URL(targets[url.port]);target.pathname=target.pathname.replace(/\/$/,'')+url.pathname;target.search=url.search;target.hash=url.hash;anchor.href=target.href;}
+    return;
+   }
    if(['localhost','127.0.0.1'].includes(url.hostname)&&['3000','5173'].includes(url.port)){
     url.hostname=location.hostname;anchor.href=url.href;
    }
