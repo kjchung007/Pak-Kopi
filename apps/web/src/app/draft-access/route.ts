@@ -4,7 +4,7 @@ export async function GET(req:NextRequest){
 
  const token=req.nextUrl.searchParams.get('token')||'';
  if(!/^[a-f0-9-]{36}$/.test(token))return new Response('Invalid preview link',{status:401});
- const doc=await siteRequest('rpc/read_website_preview',{p_token:token});
+ let doc;try{doc=await siteRequest('rpc/read_website_preview',{p_token:token});}catch(e){return new Response(e instanceof Error?e.message:'Draft connection is unavailable',{status:503,headers:{'Cache-Control':'no-store'}});}
  if(!doc)return new Response('Preview link expired. Generate a new link in the Website Editor.',{status:401});
  const path=req.nextUrl.searchParams.get('page')||'/';
  const response=new NextResponse(null,{status:307,headers:{Location:(previewServer?'':'/preview')+(['/','/menu','/story','/stores'].includes(path)?path:'/')}});
