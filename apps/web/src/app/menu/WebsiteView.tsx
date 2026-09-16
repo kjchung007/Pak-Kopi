@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/PreviewLink';
 import Image from 'next/image';
 import {brand} from '@coffee/brand';
 import {useEditingPreview} from '@/components/useEditingPreview';

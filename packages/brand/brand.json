@@ -10,7 +10,7 @@
   "timezone": "Asia/Kuala_Lumpur",
   "demo": true,
   "paymentMode": "hitpay_sandbox",
-  "notice": "Independent demo · No real orders or payments",
+  "notice": "Independent demo \u00b7 No real orders or payments",
   "logo": "/brand/pakopi-logo.png",
   "icon": "/brand/pakopi-logo.png",
   "productPlaceholder": "/brand/coffee-cream.jpg",
@@ -32,10 +32,10 @@
     "white": "#ffffff"
   },
   "urls": {
-    "website": "http://localhost:3000",
-    "order": "http://localhost:5173",
-    "admin": "http://localhost:5174",
-    "staff": "http://localhost:5175"
+    "website": "https://pakkopi.vercel.app",
+    "order": "https://pak-kopi-order.vercel.app",
+    "admin": "https://pak-kopi-admin.vercel.app",
+    "staff": "https://pak-kopi-staff.vercel.app"
   },
   "contact": {
     "email": "",

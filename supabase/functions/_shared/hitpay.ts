@@ -17,7 +17,7 @@ export async function user(req:Request){
 }
 export function orderId(value:unknown){if(!Number.isSafeInteger(value)||Number(value)<=0)throw new Error('Invalid order');return Number(value);}
 export function returnUrl(origin:unknown,id:number){
- const allowed=(Deno.env.get('HITPAY_ALLOWED_ORIGINS')||'http://localhost:5173,http://127.0.0.1:5173,http://192.168.0.148:5173').split(',').map(x=>x.trim());
+ const allowed=('https://pak-kopi-order.vercel.app,'+(Deno.env.get('HITPAY_ALLOWED_ORIGINS')||'http://localhost:5173,http://127.0.0.1:5173,http://192.168.0.148:5173')).split(',').map(x=>x.trim());
  if(typeof origin!=='string'||!allowed.includes(origin))throw new Error('Ordering address is not allowed');
  return `${origin}/?payment=return&order_id=${id}`;
 }

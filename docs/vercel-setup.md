@@ -8,9 +8,17 @@ Import the same GitHub repository separately for each app. Enable **Include sour
 | Ordering | apps/order | Vite | dist |
 | Admin | apps/admin | Vite | dist |
 | Staff and waiting board | apps/staff | Vite | dist |
-| Private website draft preview | apps/web | Next.js | Default |
 
-The draft preview is a second deployment of the website, with its own environment settings. Do not enable draft mode on the public website. The waiting board is part of the staff app, not a separate source project.
+The draft preview shares the website deployment through a protected path. Do not enable WEBSITE_DRAFT_PREVIEW on the public website. The waiting board is part of the staff app, not a separate source project.
+
+## Current Pak Kopi deployment
+
+Website: https://pakkopi.vercel.app
+Ordering: https://pak-kopi-order.vercel.app
+Admin: https://pak-kopi-admin.vercel.app
+Staff: https://pak-kopi-staff.vercel.app
+
+The hosted draft preview now uses the website at `/preview`; a fifth Vercel project is no longer needed. Keep WEBSITE_DRAFT_PREVIEW unset on the public website. Admin automatically chooses the hosted path in production and local port 3001 during development. The public site ignores the preview cookie outside `/preview`. A valid expiring admin-generated link is still required. If overriding VITE_WEBSITE_PREVIEW_URL, use https://pakkopi.vercel.app/preview.
 
 ## Environment variables
 
@@ -35,7 +43,7 @@ Do not set PAK_KOPI_BUILD_CHECK in Vercel. Do not put Supabase secret/service-ro
 
 ## After the first deployment
 
-Send back all five URLs. We will configure cross-app navigation, brand URLs, auth return URLs and allowed redirects, the admin-to-draft preview connection, and HitPay sandbox return-origin restrictions, then redeploy and test. Until these are configured, some links can still point to localhost. Keep HitPay in sandbox.
+The four project URLs are now configured in packages/brand/brand.json. We will configure cross-app navigation, brand URLs, auth return URLs and allowed redirects, the admin-to-draft preview connection, and HitPay sandbox return-origin restrictions, then redeploy and test. Until these are configured, some links can still point to localhost. Keep HitPay in sandbox.
 
 Test Google sign-in return, sandbox payment return, uploaded images, pickup branch selection, staff queue, waiting board, and draft save/preview/publish isolation. Unsaved draft edits travel only to the embedded preview; external preview links display saved drafts.
 

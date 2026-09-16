@@ -1,7 +1,8 @@
 import {cache} from 'react';
-import {cookies} from 'next/headers';
+import {cookies,headers} from 'next/headers';
 import {defaultSite,type SiteDocument} from '@coffee/brand/website';
 export const previewServer=process.env.WEBSITE_DRAFT_PREVIEW==='true';
+export async function isDraftPreview(){return previewServer||(await headers()).get('x-pak-draft-path')==='1';}
 export async function siteRequest(path:string,body?:unknown){
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
  const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -11,7 +12,7 @@ export async function siteRequest(path:string,body?:unknown){
 }
 export const getSiteDocument=cache(async():Promise<SiteDocument>=>{
  let doc:Partial<SiteDocument>|undefined;
- if(previewServer){
+ if(await isDraftPreview()){
   const token=(await cookies()).get('pak-website-preview')?.value;
   if(!token)throw new Error('Open a valid draft preview link from the admin Website Editor.');
   doc=await siteRequest('rpc/read_website_preview',{p_token:token});
