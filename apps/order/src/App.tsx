@@ -1146,11 +1146,11 @@ export default function App() {
       if(checkout.protocol !== 'https:' || !checkout.hostname.endsWith('.sandbox.hit-pay.com')) throw new Error('Invalid sandbox checkout address');
       window.location.assign(checkout.href);
     } catch(error) {
-      setAuthError(error instanceof Error ? error.message : 'Sandbox checkout unavailable');
+      console.error('Checkout could not be started', error);
+      setAuthError('Unable to open payment. Please try again.');
       setOrderBusy(false);
     }
   }
-
   return (
     <div className="app-shell">
       {toast && <div className="app-toast" role="status"><Icon size={18}><path d="M12 8v5M12 17v.01"/><circle cx="12" cy="12" r="9"/></Icon>{toast}</div>}
