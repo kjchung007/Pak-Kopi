@@ -10,7 +10,8 @@
     "./catalog": "./catalog.json",
     "./website": "./src/website.ts",
     "./demo-client": "./src/demo-client.ts",
-    "./app-url": "./src/app-url.ts"
+    "./app-url": "./src/app-url.ts",
+    "./regions": "./src/regions.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.3"

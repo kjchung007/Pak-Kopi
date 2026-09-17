@@ -4,6 +4,8 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { ActivityLog, CustomerManagement, DangerZone, type CustomerRecord } from "./AdminControls";
 import { CurrentWebsiteEditor as WebsiteEditor } from "./CurrentWebsiteEditor";
+import {StoreLocationPicker} from './StoreLocationPicker';
+import {malaysiaStates,normalizeState} from '@coffee/brand/regions';
 import "./App.css";
 
 type Page =
@@ -1901,6 +1903,7 @@ function StoreManagement({
       setError("Choose both opening and closing times.");
       return;
     }
+    if(!malaysiaStates.includes(normalizeState(selected.state))){setError('Choose the branch state or territory.');return;}
     if((selected.latitude==null)!==(selected.longitude==null)|| (selected.latitude!=null&&(!Number.isFinite(selected.latitude)||Math.abs(selected.latitude)>90))||(selected.longitude!=null&&(!Number.isFinite(selected.longitude)||Math.abs(selected.longitude)>180))){setError('Enter both valid latitude and longitude, or leave both empty.');return;}
     const payload = {
       image_url: selected.image || null, state: selected.state?.trim() || '', city: selected.city?.trim() || '', latitude:selected.latitude??null, longitude:selected.longitude??null,
@@ -2002,8 +2005,8 @@ function StoreManagement({
               <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingStore} onChange={e=>{const f=e.target.files?.[0];if(f)void uploadStore(f);}}/>
               <small>{uploadingStore?'Uploading…':'Choose an image, then save the store.'}</small>
             </label>
-            <div className="pair"><label>State / territory<input value={selected.state||''} onChange={e=>change({state:e.target.value})}/></label><label>City<input value={selected.city||''} onChange={e=>change({city:e.target.value})}/></label></div>
-            <details><summary>Map location · for nearby stores</summary><p>Enter the branch’s exact map coordinates. Leave blank if unverified.</p><div className="pair"><label>Latitude<input type="number" step="any" min="-90" max="90" value={selected.latitude??''} onChange={e=>change({latitude:e.target.value===''?null:Number(e.target.value)})}/></label><label>Longitude<input type="number" step="any" min="-180" max="180" value={selected.longitude??''} onChange={e=>change({longitude:e.target.value===''?null:Number(e.target.value)})}/></label></div></details>
+            <div className="pair"><label>State / territory<select value={normalizeState(selected.state)} onChange={e=>change({state:e.target.value})}><option value="">Choose state</option>{malaysiaStates.map(s=><option key={s}>{s}</option>)}</select></label><label>City<input value={selected.city||''} onChange={e=>change({city:e.target.value})}/></label></div>
+            <StoreLocationPicker key={selected.id} latitude={selected.latitude} longitude={selected.longitude} address={selected.address} onChange={change}/>
             <label>
               Store name
               <input

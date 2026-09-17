@@ -2,23 +2,25 @@ import {appUrl} from '@coffee/brand/app-url';
 import { brand } from '@coffee/brand';
 import catalog from '@coffee/brand/catalog';
 import {getSiteDocument} from './site-document';
+import type {WebsiteStore} from '@coffee/brand/website';
+import {normalizeState} from '@coffee/brand/regions';
 export type Product = { id: number; name: string; description: string; priceCents: number; image: string; category: string };
-export type Store = { featured?:boolean; acceptingPickup?:boolean; image?:string; id: number; name: string; address: string; phone: string; opening: string; closing: string };
+export type Store = WebsiteStore;
 export type Campaign = { id: number; title: string; body: string; image: string };
 export type WebsiteSection = { id:string; type:"hero"|"text_image"|"rich_text"|"call_to_action"|"product_catalog"|"store_list"; heading:string; body:string; imageUrl?:string; buttonLabel?:string; buttonUrl?:string; background?:"navy"|"cream"|"white"|"gold"; align?:"left"|"center"; imagePositionX?:number; imagePositionY?:number; imageHeight?:number };
 export type WebsitePage = { id:number; title:string; slug:string; routePath:string; seoTitle:string; seoDescription:string; sections:WebsiteSection[] };
 
 // The publishable key is safe in website code; RLS remains the authorization boundary.
 // Each client supplies its own backend. Offline previews use the local catalogue.
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL)?.trim();
+const key = (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY)?.trim();
 
 async function rest<T>(table: string, params: Record<string, string>): Promise<T[]> {
   if (!url || !key) return [];
   const endpoint = new URL(`${url}/rest/v1/${table}`);
   Object.entries(params).forEach(([name, value]) => endpoint.searchParams.set(name, value));
   try {
-    const response = await fetch(endpoint, { headers: { apikey: key, Authorization: `Bearer ${key}` }, next: { revalidate: 60 }, signal: AbortSignal.timeout(6000) });
+    const response = await fetch(endpoint, { headers: { apikey: key, Authorization: `Bearer ${key}` }, ...(table==='stores'?{cache:'no-store' as const}:{next:{revalidate:60}}), signal: AbortSignal.timeout(6000) });
     return response.ok ? await response.json() as T[] : [];
   } catch { return []; }
 }
@@ -34,11 +36,26 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getStores(): Promise<Store[]> {
-  const site=await getSiteDocument();if(site.stores!==null)return site.stores;
-  type Row = { accepting_pickup:boolean; image_url:string|null; id:number; name:string; address:string|null; phone:string|null; opening_time:string|null; closing_time:string|null };
-  const rows = await rest<Row>("stores", { select: "id,name,address,phone,opening_time,closing_time,image_url,accepting_pickup", active: "eq.true", order: "name.asc" });
-  if (!rows.length) return catalog.stores.map(s=>({...s,acceptingPickup:s.acceptingPickup??true,phone:'',opening:'00:00',closing:'00:00'}));
-  return rows.map((row) => ({ acceptingPickup:row.accepting_pickup, image:row.image_url||brand.storePlaceholder, id:row.id, name:row.name, address:row.address || "Address awaiting confirmation", phone:row.phone || "", opening:row.opening_time || "00:00", closing:row.closing_time || "00:00" }));
+  const site=await getSiteDocument();
+  type Row = {state:string;city:string;latitude:number|null;longitude:number|null; accepting_pickup:boolean; image_url:string|null; id:number; name:string; address:string|null; phone:string|null; opening_time:string|null; closing_time:string|null };
+  const rows = await rest<Row>("stores", { select: "id,name,address,phone,opening_time,closing_time,image_url,accepting_pickup,state,city,latitude,longitude", active: "eq.true", order: "name.asc" });
+  const live:Store[]=rows.map(row=>({state:normalizeState(row.state),city:row.city,latitude:row.latitude,longitude:row.longitude,acceptingPickup:row.accepting_pickup,image:row.image_url||brand.storePlaceholder,id:row.id,name:row.name,address:row.address||'',phone:row.phone||'',opening:row.opening_time||'00:00',closing:row.closing_time||'00:00'}));
+    if (site.stores !== null) {
+      const editorialById = new Map(site.stores.map((store) => [store.id, store]));
+      const merged = live.map((store) => ({
+        ...store,
+        ...editorialById.get(store.id),
+        state: normalizeState(editorialById.get(store.id)?.state || store.state),
+      }));
+      const liveIds = new Set(live.map((store) => store.id));
+      const editorialOnly = site.stores.filter((store) => !liveIds.has(store.id));
+      return [...merged, ...editorialOnly.map((store) => ({
+        ...store,
+        state: normalizeState(store.state || (/Sabah/i.test(store.address) ? 'Sabah' : '')),
+      }))];
+    }
+  if(live.length||url)return live;
+  return catalog.stores.map(s=>({...s,state:'Sabah',acceptingPickup:s.acceptingPickup??true,phone:'',opening:'00:00',closing:'00:00'}));
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {

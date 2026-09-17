@@ -3040,15 +3040,7 @@ function StoreSheet({
         aria-modal="true"
         aria-labelledby="store-title"
       >
-        <button
-          className="sheet-close light"
-          onClick={close}
-          aria-label="Close store selection"
-        >
-          <Icon>
-            <path d="m6 6 12 12M18 6 6 18" />
-          </Icon>
-        </button>
+        <button className="store-sheet-handle sheet-close" aria-label="Dismiss store selection" onClick={close} onTouchStart={e=>{e.currentTarget.dataset.startY=String(e.touches[0].clientY)}} onTouchEnd={e=>{if(e.changedTouches[0].clientY-Number(e.currentTarget.dataset.startY)>40)close()}}><span/></button>
         <StoreCards stores={stores} selected={selected} loading={loading} error={error} choose={choose}/>
 
       </section>
