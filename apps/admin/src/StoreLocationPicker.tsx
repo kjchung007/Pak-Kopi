@@ -4,10 +4,10 @@ import 'leaflet/dist/leaflet.css';
 import {normalizeState,malaysiaStates} from '@coffee/brand/regions';
 import './store-location.css';
 type Place={lat:string;lon:string;display_name:string;address?:{state?:string;city?:string;town?:string}};
-export function StoreLocationPicker({latitude,longitude,address,onChange}:{latitude?:number|null;longitude?:number|null;address:string;onChange:(value:{latitude:number|null;longitude:number|null;state?:string;city?:string})=>void}){
+export function StoreLocationPicker({latitude,longitude,mapsUrl,address,onChange}:{latitude?:number|null;longitude?:number|null;mapsUrl?:string;address:string;onChange:(value:{latitude:number|null;longitude:number|null;state?:string;city?:string})=>void}){
  const node=useRef<HTMLDivElement>(null),map=useRef<L.Map|null>(null),pin=useRef<L.Marker|null>(null),callback=useRef(onChange);
  const [search,setSearch]=useState(address),[places,setPlaces]=useState<Place[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const [mapsLink,setMapsLink]=useState('');
+ const [mapsLink,setMapsLink]=useState(mapsUrl||'');
  const controller=useRef<AbortController|null>(null);callback.current=onChange;
  const valid=latitude!=null&&longitude!=null&&Number.isFinite(latitude)&&Number.isFinite(longitude)&&Math.abs(latitude)<=90&&Math.abs(longitude)<=180;
  useEffect(()=>{

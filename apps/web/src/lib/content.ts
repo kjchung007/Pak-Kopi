@@ -37,9 +37,9 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function getStores(): Promise<Store[]> {
   const site=await getSiteDocument();
-  type Row = {state:string;city:string;latitude:number|null;longitude:number|null; accepting_pickup:boolean; image_url:string|null; id:number; name:string; address:string|null; phone:string|null; opening_time:string|null; closing_time:string|null };
-  const rows = await rest<Row>("stores", { select: "id,name,address,phone,opening_time,closing_time,image_url,accepting_pickup,state,city,latitude,longitude", active: "eq.true", order: "name.asc" });
-  const live:Store[]=rows.map(row=>({state:normalizeState(row.state),city:row.city,latitude:row.latitude,longitude:row.longitude,acceptingPickup:row.accepting_pickup,image:row.image_url||brand.storePlaceholder,id:row.id,name:row.name,address:row.address||'',phone:row.phone||'',opening:row.opening_time||'00:00',closing:row.closing_time||'00:00'}));
+  type Row = {state:string;city:string;latitude:number|null;longitude:number|null;maps_url:string|null; accepting_pickup:boolean; image_url:string|null; id:number; name:string; address:string|null; phone:string|null; opening_time:string|null; closing_time:string|null };
+  const rows = await rest<Row>("stores", { select: "id,name,address,phone,opening_time,closing_time,image_url,maps_url,accepting_pickup,state,city,latitude,longitude", active: "eq.true", order: "name.asc" });
+    const live:Store[]=rows.map(row=>({state:normalizeState(row.state),city:row.city,latitude:row.latitude,longitude:row.longitude,mapsUrl:row.maps_url||undefined,acceptingPickup:row.accepting_pickup,image:row.image_url||brand.storePlaceholder,id:row.id,name:row.name,address:row.address||'',phone:row.phone||'',opening:row.opening_time||'00:00',closing:row.closing_time||'00:00'}));
     if (site.stores !== null) {
       const editorialById = new Map(site.stores.map((store) => [store.id, store]));
       const merged = live.map((store) => ({

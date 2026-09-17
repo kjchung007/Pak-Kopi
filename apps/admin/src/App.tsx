@@ -84,6 +84,7 @@ type Store = {
   city?: string;
   latitude?: number | null;
   longitude?: number | null;
+  mapsUrl?: string;
   id: number;
   name: string;
   address: string;
@@ -461,7 +462,7 @@ function Shell({
         supabase!
           .from("stores")
           .select(
-            "id,name,address,phone,preparation_minutes,opening_time,closing_time,accepting_pickup,active,image_url,state,city,latitude,longitude",
+            "id,name,address,phone,preparation_minutes,opening_time,closing_time,accepting_pickup,active,image_url,maps_url,state,city,latitude,longitude",
           )
           .order("name"),
         supabase!
@@ -608,7 +609,7 @@ function Shell({
             name: x.name,
             address: x.address,
             phone: x.phone ?? "",
-            image: x.image_url ?? "", state: x.state ?? "", city: x.city ?? "", latitude: x.latitude, longitude: x.longitude,
+            image: x.image_url ?? "", mapsUrl: x.maps_url ?? "", state: x.state ?? "", city: x.city ?? "", latitude: x.latitude, longitude: x.longitude,
             preparationMinutes: x.preparation_minutes,
             openingTime: x.opening_time?.slice(0, 5) ?? "10:00",
             closingTime: x.closing_time?.slice(0, 5) ?? "22:00",
@@ -1906,7 +1907,7 @@ function StoreManagement({
     if(!malaysiaStates.includes(normalizeState(selected.state))){setError('Choose the branch state or territory.');return;}
     if((selected.latitude==null)!==(selected.longitude==null)|| (selected.latitude!=null&&(!Number.isFinite(selected.latitude)||Math.abs(selected.latitude)>90))||(selected.longitude!=null&&(!Number.isFinite(selected.longitude)||Math.abs(selected.longitude)>180))){setError('Enter both valid latitude and longitude, or leave both empty.');return;}
     const payload = {
-      image_url: selected.image || null, state: selected.state?.trim() || '', city: selected.city?.trim() || '', latitude:selected.latitude??null, longitude:selected.longitude??null,
+      image_url: selected.image || null, maps_url: selected.mapsUrl?.trim() || null, state: selected.state?.trim() || '', city: selected.city?.trim() || '', latitude:selected.latitude??null, longitude:selected.longitude??null,
       name: selected.name,
       address: selected.address,
       phone: selected.phone?.trim() || "",
@@ -2006,7 +2007,7 @@ function StoreManagement({
               <small>{uploadingStore?'Uploading…':'Choose an image, then save the store.'}</small>
             </label>
             <div className="pair"><label>State / territory<select value={normalizeState(selected.state)} onChange={e=>change({state:e.target.value})}><option value="">Choose state</option>{malaysiaStates.map(s=><option key={s}>{s}</option>)}</select></label><label>City<input value={selected.city||''} onChange={e=>change({city:e.target.value})}/></label></div>
-            <StoreLocationPicker key={selected.id} latitude={selected.latitude} longitude={selected.longitude} address={selected.address} onChange={change}/>
+            <StoreLocationPicker key={selected.id} latitude={selected.latitude} longitude={selected.longitude} mapsUrl={selected.mapsUrl} address={selected.address} onChange={change}/>
             <label>
               Store name
               <input
