@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/resolve-maps",
+      "destination": "/api/resolve-maps"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

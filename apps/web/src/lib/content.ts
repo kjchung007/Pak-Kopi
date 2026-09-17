@@ -45,6 +45,9 @@ export async function getStores(): Promise<Store[]> {
       const merged = live.map((store) => ({
         ...store,
         ...editorialById.get(store.id),
+        mapsUrl: store.mapsUrl,
+        latitude: store.latitude,
+        longitude: store.longitude,
         state: normalizeState(editorialById.get(store.id)?.state || store.state),
       }));
       const liveIds = new Set(live.map((store) => store.id));

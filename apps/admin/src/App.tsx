@@ -5,6 +5,7 @@ import { createClient, type SupabaseClient, type User } from "@supabase/supabase
 import { ActivityLog, CustomerManagement, DangerZone, type CustomerRecord } from "./AdminControls";
 import { CurrentWebsiteEditor as WebsiteEditor } from "./CurrentWebsiteEditor";
 import {StoreLocationPicker} from './StoreLocationPicker';
+import {mapsLink} from '../lib/google-maps.mjs';
 import {malaysiaStates,normalizeState} from '@coffee/brand/regions';
 import "./App.css";
 
@@ -1849,7 +1850,7 @@ function StoreManagement({
 }: {
   identity: AdminIdentity;
   stores: Store[];
-  setStores: (items: Store[]) => void;
+  setStores: import('react').Dispatch<import('react').SetStateAction<Store[]>>;
   team: StaffMember[];
   setTeam: (items: StaffMember[]) => void;
 }) {
@@ -1864,8 +1865,9 @@ function StoreManagement({
   const selected = stores.find((store) => store.id === selectedId) ?? null;
   function change(patch: Partial<Store>) {
     if (!selected) return;
+    setSaved(false);
     setStores(
-      stores.map((store) =>
+      current => current.map((store) =>
         store.id === selected.id ? { ...store, ...patch } : store,
       ),
     );
@@ -1902,6 +1904,10 @@ function StoreManagement({
     setSaved(false);
     if (!selected.openingTime || !selected.closingTime) {
       setError("Choose both opening and closing times.");
+      return;
+    }
+    if(selected.mapsUrl?.trim() && !mapsLink(selected.mapsUrl)){
+      setError('Use an HTTPS Google Maps share link or place URL for Directions.');
       return;
     }
     if(!malaysiaStates.includes(normalizeState(selected.state))){setError('Choose the branch state or territory.');return;}

@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {mapsLink,coordinatesFromMaps,resolveMaps} from '../apps/admin/lib/google-maps.mjs';
+const share='https://maps.app.goo.gl/51SgmiWqKn1E9wUa8';
+const place='https://www.google.com/maps/place/Pak+Kopi/@5,118,17z/data=!3m1!4b1!3d5.8580692!4d118.0739079';
+assert.equal(mapsLink(share),share);
+assert.equal(mapsLink(place),place);
+for(const url of ['javascript:alert(1)','https://google.com.evil.test/maps','https://127.0.0.1/maps','https://www.google.com:8000/maps','https://foo@maps.app.goo.gl/x']) assert.equal(mapsLink(url),null);
+assert.deepEqual(coordinatesFromMaps(place),{latitude:5.8580692,longitude:118.0739079});
+assert.equal(coordinatesFromMaps('https://www.google.com/maps/@5,118,17z'),null,'Camera centre must not be used as branch location');
+assert.deepEqual(coordinatesFromMaps('https://www.google.com/maps?q=5.8%2C118.1'),{latitude:5.8,longitude:118.1});
+assert.equal(coordinatesFromMaps('https://www.google.com/maps?q=95,118'),null);
+let calls=0;
+assert.deepEqual(await resolveMaps(share,async()=>{calls++;return new Response(null,{status:302,headers:{location:place}})}),{latitude:5.8580692,longitude:118.0739079});
+assert.equal(calls,1);
+await assert.rejects(()=>resolveMaps(share,async()=>new Response(null,{status:302,headers:{location:'http://127.0.0.1'}})),/unsupported/);
+assert.equal(await resolveMaps(share,async()=>new Response(null,{status:200})),null);
+console.log('Maps tests passed: exact links, place coordinates, encoded queries, camera rejection, short-link expansion and redirect safety.');
