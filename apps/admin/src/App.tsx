@@ -1909,7 +1909,7 @@ function StoreManagement({
       image_url: selected.image || null, state: selected.state?.trim() || '', city: selected.city?.trim() || '', latitude:selected.latitude??null, longitude:selected.longitude??null,
       name: selected.name,
       address: selected.address,
-      phone: selected.phone || null,
+      phone: selected.phone?.trim() || "",
       preparation_minutes: selected.preparationMinutes,
       opening_time: selected.openingTime,
       closing_time: selected.closingTime,
