@@ -58,7 +58,7 @@ export async function getStores(): Promise<Store[]> {
       }))];
     }
   if(live.length||url)return live;
-  return catalog.stores.map(s=>({...s,state:'Sabah',acceptingPickup:s.acceptingPickup??true,phone:'',opening:'00:00',closing:'00:00'}));
+  return catalog.stores.map(s=>({...s,state:s.state||'Sabah',acceptingPickup:s.acceptingPickup??true,phone:'',opening:'00:00',closing:'00:00'}));
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {

@@ -1868,7 +1868,9 @@ function StoreManagement({
     [error, setError] = useState(""),
     [saved, setSaved] = useState(false),
     [selectedState, setSelectedState] = useState<string>("all"),
-    [activeTab, setActiveTab] = useState<"details" | "team">("details");
+    [activeTab, setActiveTab] = useState<"details" | "team">("details"),
+    [confirmDelete, setConfirmDelete] = useState(false),
+    [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (selectedId === 0 && stores[0]) setSelectedId(stores[0].id);
@@ -2029,6 +2031,67 @@ function StoreManagement({
     window.setTimeout(() => setSaved(false), 2000);
   }
 
+  async function removeStore() {
+    if (!selected) return;
+    if (selected.id < 0) {
+      const next = stores.filter((s) => s.id !== selected.id);
+      setStores(next);
+      const nextSelected = filteredStores.find((s) => s.id !== selected.id) || next[0] || null;
+      setSelectedId(nextSelected?.id ?? null);
+      setConfirmDelete(false);
+      return;
+    }
+    if (storeStaff.length > 0) {
+      setError(
+        `Cannot delete "${selected.name}" because it still has ${storeStaff.length} team account(s) assigned. Please delete or reassign them in the Store Team tab first.`,
+      );
+      setConfirmDelete(false);
+      return;
+    }
+    setDeleting(true);
+    setError("");
+    try {
+      const { error: delError } = await supabase!
+        .from("stores")
+        .delete()
+        .eq("id", selected.id);
+      if (delError) {
+        if (delError.message.includes("orders") || delError.message.includes("foreign key")) {
+          setError(
+            `Cannot delete "${selected.name}" because it has existing customer order records. To preserve financial order history, please deactivate it by unchecking "Active location" and "Accept pickup orders" instead.`,
+          );
+        } else {
+          setError(delError.message);
+        }
+        setDeleting(false);
+        setConfirmDelete(false);
+        return;
+      }
+      const { data: authData } = (await supabase?.auth.getUser()) || {};
+      if (authData?.user?.id) {
+        void supabase?.from("admin_audit_logs").insert({
+          admin_id: authData.user.id,
+          action_type: "store.deleted",
+          target_id: String(selected.id),
+          details_json: {
+            name: selected.name,
+            state: selected.state,
+            city: selected.city,
+          },
+        });
+      }
+      const next = stores.filter((s) => s.id !== selected.id);
+      setStores(next);
+      const nextSelected = filteredStores.find((s) => s.id !== selected.id) || next[0] || null;
+      setSelectedId(nextSelected?.id ?? null);
+      setConfirmDelete(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete store.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="store-master-detail">
       <section className="panel store-master">
@@ -2176,7 +2239,16 @@ function StoreManagement({
                 </p>
               </div>
               <div className="detail-heading-actions">
-                <button className="primary store-save-btn" onClick={save} disabled={uploadingStore}>
+                <button
+                  type="button"
+                  className="destructive store-delete-btn"
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={uploadingStore || deleting}
+                  title="Delete branch"
+                >
+                  Delete branch
+                </button>
+                <button className="primary store-save-btn" onClick={save} disabled={uploadingStore || deleting}>
                   {saved ? "Saved ✓" : "Save store"}
                 </button>
               </div>
@@ -2441,8 +2513,33 @@ function StoreManagement({
                   </div>
                 )}
 
+                {/* 5. Danger Zone */}
+                <div className="store-config-section store-danger-section">
+                  <div className="store-section-header">
+                    <h4>5. Danger Zone</h4>
+                    <small>Permanently delete this branch</small>
+                  </div>
+                  <div className="store-danger-card">
+                    <div>
+                      <strong>Delete {selected.name}</strong>
+                      <p>
+                        Permanently remove this branch from the database and customer storefront.
+                        {selected.id < 0 ? " (Unsaved draft)" : " This action cannot be undone."}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="destructive"
+                      onClick={() => setConfirmDelete(true)}
+                      disabled={deleting}
+                    >
+                      Delete branch
+                    </button>
+                  </div>
+                </div>
+
                 <div className="store-save-bar">
-                  <button className="primary" onClick={save} disabled={uploadingStore}>
+                  <button className="primary" onClick={save} disabled={uploadingStore || deleting}>
                     {saved ? "Saved ✓" : "Save store"}
                   </button>
                 </div>
@@ -2463,6 +2560,52 @@ function StoreManagement({
                     ])
                   }
                 />
+              </div>
+            )}
+
+            {confirmDelete && selected && (
+              <div
+                className="admin-modal-backdrop"
+                onMouseDown={(e) => {
+                  if (e.target === e.currentTarget && !deleting) setConfirmDelete(false);
+                }}
+              >
+                <section
+                  className="admin-confirm-modal danger-confirm"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="delete-branch-modal-title"
+                >
+                  <h2 id="delete-branch-modal-title">Delete {selected.name}?</h2>
+                  <p>
+                    Are you sure you want to permanently delete this branch
+                    {selected.city ? ` in ${selected.city}` : ""}{selected.state ? `, ${normalizeState(selected.state)}` : ""}?
+                    This will remove it from the customer ordering app, website locator, and admin console.
+                  </p>
+                  {storeStaff.length > 0 && (
+                    <div className="error" style={{ margin: "12px 0" }}>
+                      This branch currently has {storeStaff.length} team account{storeStaff.length > 1 ? "s" : ""} assigned.
+                      Please delete or reassign them in the <strong>Store Team</strong> tab before deleting this branch.
+                    </div>
+                  )}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(false)}
+                      disabled={deleting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="destructive"
+                      disabled={deleting || storeStaff.length > 0}
+                      onClick={removeStore}
+                    >
+                      {deleting ? "Deleting…" : "Yes, delete branch"}
+                    </button>
+                  </div>
+                </section>
               </div>
             )}
           </section>
