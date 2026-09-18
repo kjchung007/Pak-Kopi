@@ -7,11 +7,18 @@ export async function proxy(request:NextRequest){
     const path=request.nextUrl.pathname.slice('/preview'.length)||'/';
     if(!['/','/menu','/story','/stores','/draft-access'].includes(path))return new NextResponse('Not found',{status:404});
     requestHeaders.set('x-pak-draft-path','1');
+    const token=request.nextUrl.searchParams.get('token')||request.cookies.get('pak-website-preview')?.value;
+    if(token){requestHeaders.set('x-pak-preview-token',token);}
     const target=request.nextUrl.clone();target.pathname=path;
     const response=NextResponse.rewrite(target,{request:{headers:requestHeaders}});
+    if(token&&!request.cookies.get('pak-website-preview')){
+      response.cookies.set('pak-website-preview',token,{httpOnly:true,sameSite:'none',secure:true,partitioned:true,maxAge:3600,path:'/'});
+    }
     response.headers.set('Cache-Control','private, no-store');
     response.headers.set('Referrer-Policy','no-referrer');
     response.headers.set('X-Robots-Tag','noindex, nofollow');
+    response.headers.delete('X-Frame-Options');
+    response.headers.set('Content-Security-Policy',"frame-ancestors 'self' https://pak-kopi-admin.vercel.app https://*.vercel.app http://localhost:* http://127.0.0.1:*");
     return response;
   }
   if(request.method!=="GET"&&request.method!=="HEAD")return NextResponse.next({request:{headers:requestHeaders}});

@@ -11,7 +11,8 @@ export function useEditingPreview(initial:SiteDocument,enabled:boolean){
   if(!enabled||window.parent===window)return;
   const origin=appUrl(process.env.NEXT_PUBLIC_ADMIN_URL,process.env.NODE_ENV==='development'?`${location.protocol}//${location.hostname}:5174`:brand.urls.admin,process.env.NODE_ENV==='development');
   function receive(event:MessageEvent){
-   if(event.source!==window.parent||event.origin!==origin||event.data?.type!=='pak-kopi-edit-preview')return;
+   const match=event.origin===origin||event.origin===brand.urls.admin||/^https:\/\/pak-kopi-admin(-[a-z0-9-]+)?\.vercel\.app$/.test(event.origin);
+   if(event.source!==window.parent||!match||event.data?.type!=='pak-kopi-edit-preview')return;
    const content=event.data.content as SiteDocument;
    if(content?.schema!==1||!content.copy||!content.images||!Array.isArray(content.stores)||!Array.isArray(content.products))return;
    setSite(content);

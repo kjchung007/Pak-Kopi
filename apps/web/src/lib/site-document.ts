@@ -13,7 +13,8 @@ export async function siteRequest(path:string,body?:unknown){
 export const getSiteDocument=cache(async():Promise<SiteDocument>=>{
  let doc:Partial<SiteDocument>|undefined;
  if(await isDraftPreview()){
-  const token=(await cookies()).get('pak-website-preview')?.value;
+  const headerList=await headers();
+  const token=headerList.get('x-pak-preview-token')||(await cookies()).get('pak-website-preview')?.value;
   if(!token)throw new Error('Open a valid draft preview link from the admin Website Editor.');
   doc=await siteRequest('rpc/read_website_preview',{p_token:token});
   if(!doc)throw new Error('This draft preview link has expired. Open a new link from the Website Editor.');
