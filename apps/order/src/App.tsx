@@ -138,9 +138,18 @@ type UserVoucher = {
 type RewardGrant = { id: number; source: string } | null;
 type CustomerProfile = { display_name: string; phone: string };
 
-function Icon({ children, size = 22 }: { children: ReactNode; size?: number }) {
+function Icon({
+  children,
+  size = 22,
+  className,
+}: {
+  children: ReactNode;
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
+      className={className}
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -1146,7 +1155,6 @@ export default function App() {
       if(checkout.protocol !== 'https:' || !checkout.hostname.endsWith('.sandbox.hit-pay.com')) throw new Error('Invalid sandbox checkout address');
       window.location.assign(checkout.href);
     } catch(error) {
-      console.error('Checkout could not be started', error);
       setAuthError('Unable to open payment. Please try again.');
       setOrderBusy(false);
     }
@@ -1154,8 +1162,8 @@ export default function App() {
   return (
     <div className="app-shell">
       {toast && <div className="app-toast" role="status"><Icon size={18}><path d="M12 8v5M12 17v.01"/><circle cx="12" cy="12" r="9"/></Icon>{toast}</div>}
-      <div className="scroll-area">{brand.showDemoBanner !== false && <div className="demo-notice">{brand.notice} · {brand.menuShortNote}</div>}
-        <header className="topbar">
+      <div className={`scroll-area${tab === "home" ? " scroll-home" : ""}`}>{brand.showDemoBanner !== false && <div className="demo-notice">{brand.notice} · {brand.menuShortNote}</div>}
+        <header className={`topbar${tab === "home" ? " topbar-home" : ""}`}>
           <button
             className="wordmark"
             onClick={() => setTab("home")}
@@ -1582,84 +1590,110 @@ function HomePage({
     Number(rewardSettings.stamp_enabled);
   const showRewardSummary = auth === "email" && rewardMetricCount > 1;
   const showVoucherGreeting = auth === "email" && rewardMetricCount === 1;
+  const dayGreeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  })();
   return (
     <main className="home-page">
-      <section className="home-welcome">
-        <div>
-          <span>{auth === "none" ? "Welcome to" : "Good to see you,"}</span>
-          <h1>
-            {auth === "email" ? greetingName : settings.shop_name}
-          </h1>
-          <p>Pickup ordering, made comfortably quick.</p>
-        </div>
-        {showVoucherGreeting && (
-          <button
-            className="welcome-voucher"
-            onClick={() => requestTab("rewards")}
-            aria-label={`${activeVoucherCount} ${activeVoucherCount === 1 ? "voucher" : "vouchers"} available. Open rewards.`}
-          >
-            <span className="welcome-voucher-icon">
-              <Icon size={34}>
-                <path d="M5 7h14v3a2.5 2.5 0 0 0 0 5v3H5v-3a2.5 2.5 0 0 0 0-5V7Z" />
-                <path d="M10 7v11" strokeDasharray="2 2" />
-              </Icon>
-              <strong>{activeVoucherCount}</strong>
+      <div className="home-hero">
+        <section className="home-welcome">
+          <div className="home-greeting">
+            <span className="home-greeting-badge">
+              {auth === "none" ? "Welcome to" : dayGreeting}
             </span>
-            <small>{activeVoucherCount === 1 ? "Voucher" : "Vouchers"}</small>
-          </button>
-        )}
-      </section>
-      <section className="fulfillment-choices" aria-label="Choose order type">
-        <button
-          disabled={!settings.accepting_pickup}
-          className={fulfillment === "pickup" ? "active" : ""}
-          onClick={selectPickup}
-        >
-          <Icon>
-            <path d="M6 8h12l-1 12H7L6 8Z" />
-            <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-          </Icon>
-          <span>
-            <strong>{selectedStore?.name ?? "Choose pickup store"}</strong>
-            <small>
-              {selectedStore
-                ? storeHours(selectedStore)
-                : "Select a branch to continue"}
-            </small>
-          </span>
-        </button>
-        <button onClick={showDeliverySoon}>
-          <Icon>
-            <path d="M3 7h12v10H3zM15 10h3l3 3v4h-6z" />
-            <circle cx="7" cy="19" r="2" />
-            <circle cx="18" cy="19" r="2" />
-          </Icon>
-          <span>
-            <strong>Delivery</strong>
-            <small>Coming soon</small>
-          </span>
-        </button>
-      </section>
-      {selectedStore && (
-        <section className="brewing-banner" role="status" aria-atomic="true">
-          <span className="brewing-icon">
-            <Icon>
-              <path d="M7 8h10l-1 12H8L7 8ZM9 4h6M18 10h2a2 2 0 0 1 0 4h-3" />
-            </Icon>
-          </span>
-          <span>
-            <strong>Now Brewing</strong>
-            <small>
-              {queue.activeCups} {queue.activeCups === 1 ? "cup" : "cups"} in
-              the queue at {selectedStore.name}
-            </small>
-          </span>
-          <span className="brewing-eta">
-            <small>Estimated wait</small>
-            <strong>{queue.etaMinutes} min</strong>
-          </span>
+            <h1 className="home-greeting-name">
+              {auth === "email" ? greetingName : settings.shop_name}
+            </h1>
+            <p className="home-greeting-desc">
+              {auth === "none"
+                ? "Pickup ordering, made comfortably quick."
+                : "Freshly brewed everyday kopi."}
+            </p>
+          </div>
+          {showVoucherGreeting && (
+            <button
+              className="welcome-voucher"
+              onClick={() => requestTab("rewards")}
+              aria-label={`${activeVoucherCount} ${activeVoucherCount === 1 ? "voucher" : "vouchers"} available. Open rewards.`}
+            >
+              <span className="welcome-voucher-icon">
+                <Icon size={24}>
+                  <path d="M5 7h14v3a2.5 2.5 0 0 0 0 5v3H5v-3a2.5 2.5 0 0 0 0-5V7Z" />
+                  <path d="M10 7v11" strokeDasharray="2 2" />
+                </Icon>
+                <strong>{activeVoucherCount}</strong>
+              </span>
+              <small>{activeVoucherCount === 1 ? "Voucher" : "Vouchers"}</small>
+            </button>
+          )}
         </section>
-      )}
+
+        {selectedStore ? (
+          <div className="home-brewing-pill" role="status" aria-label={`Now brewing status at ${selectedStore.name}`}>
+            <div className="home-brewing-stat">
+              <Coffee size={17} weight="fill" className="home-brewing-icon" />
+              <span>
+                <strong>{queue.activeCups}</strong> {queue.activeCups === 1 ? "cup" : "cups"} in queue
+              </span>
+            </div>
+            <span className="home-brewing-divider" aria-hidden />
+            <div className="home-brewing-stat">
+              <Icon size={16} className="home-brewing-icon">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 3" />
+              </Icon>
+              <span>
+                <strong>~{queue.etaMinutes} min</strong> wait
+              </span>
+            </div>
+            <span className="home-brewing-store-tag">{selectedStore.name}</span>
+          </div>
+        ) : (
+          <div className="home-brewing-pill empty" role="status">
+            <Coffee size={17} weight="fill" className="home-brewing-icon" />
+            <span>Freshly brewed daily · Select pickup branch to check wait</span>
+          </div>
+        )}
+
+        <section className="fulfillment-choices" aria-label="Choose order type">
+          <button
+            disabled={!settings.accepting_pickup}
+            className={`choice-card ${fulfillment === "pickup" ? "active" : ""}`}
+            onClick={selectPickup}
+          >
+            <div className="choice-icon-wrap pickup">
+              <Icon size={22}>
+                <path d="M6 8h12l-1 12H7L6 8Z" />
+                <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+              </Icon>
+            </div>
+            <div className="choice-text">
+              <strong>Pickup</strong>
+              <small>
+                {selectedStore
+                  ? `${selectedStore.name} · ${storeHours(selectedStore)}`
+                  : "Select a branch to continue"}
+              </small>
+            </div>
+          </button>
+          <button className="choice-card delivery" onClick={showDeliverySoon}>
+            <div className="choice-icon-wrap delivery">
+              <Icon size={22}>
+                <path d="M3 7h12v10H3zM15 10h3l3 3v4h-6z" />
+                <circle cx="7" cy="19" r="2" />
+                <circle cx="18" cy="19" r="2" />
+              </Icon>
+            </div>
+            <div className="choice-text">
+              <strong>Delivery</strong>
+              <small>Coming soon</small>
+            </div>
+          </button>
+        </section>
+      </div>
       {showRewardSummary && (
         <section className="home-reward-overview">
           <h2>My Reward</h2>

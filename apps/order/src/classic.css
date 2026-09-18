@@ -58,3 +58,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #8063
 .stamp-track>span:not(.filled) img{opacity:.2;filter:grayscale(1)}
 .stamp-track>span.filled img{opacity:1;filter:none}
 .stamp-heading>span,.stamp-heading>strong,.stamp-heading>small,.stamp-balance p{color:#513725}
+
+/* Home tab blended hero & topbar overrides */
+.topbar.topbar-home{background:rgba(20,14,10,.6)!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+.topbar.topbar-home .wordmark strong{color:#fff!important}
+.topbar.topbar-home .wordmark small{color:#dfd2c4!important}
+.topbar.topbar-home .icon-button{color:#fff!important;background:rgba(255,255,255,.15)!important;border-color:rgba(255,255,255,.25)!important}
+.home-hero .home-welcome{background:transparent!important;color:#fff!important}
+.home-hero .home-welcome p,.home-hero .home-welcome small,.home-hero .home-welcome span{color:#ded6cc}
+

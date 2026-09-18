@@ -657,6 +657,214 @@ legend {
   display: none;
 }
 
+/* Home tab blended header & hero */
+.scroll-area.scroll-home {
+  padding-top: 0 !important;
+}
+.topbar.topbar-home {
+  background: rgba(20, 14, 10, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.topbar.topbar-home .wordmark strong {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.topbar.topbar-home .wordmark small {
+  color: #dfd2c4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.topbar.topbar-home .icon-button {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+}
+
+.home-hero {
+  position: relative;
+  box-sizing: border-box;
+  padding-top: calc(74px + 14px);
+  padding-bottom: 20px;
+  background:
+    linear-gradient(180deg, rgba(16, 12, 10, 0.72) 0%, rgba(20, 14, 10, 0.82) 55%, rgba(28, 20, 15, 0.94) 100%),
+    url('/brand/about-wide-branded.webp') center 28% / cover no-repeat;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  box-shadow: 0 12px 32px rgba(26, 17, 10, 0.18);
+  margin-bottom: 18px;
+}
+
+.home-hero .home-welcome {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 16px 14px;
+  background: transparent !important;
+  min-height: auto;
+}
+.home-hero .home-welcome::after {
+  display: none !important;
+  content: none !important;
+}
+.home-hero .home-greeting-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #efd064;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.home-hero .home-greeting-name {
+  margin: 0;
+  font-family: var(--brand-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.home-hero .home-greeting-desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #ded6cc;
+}
+
+/* Minimal brewing status pill */
+.home-brewing-pill {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 16px 14px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 12px;
+}
+.home-brewing-pill.empty {
+  color: #dfd2c4;
+  font-size: 12px;
+  gap: 8px;
+}
+.home-brewing-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #f7ede2;
+}
+.home-brewing-icon {
+  color: #efd064;
+  flex-shrink: 0;
+}
+.home-brewing-stat strong {
+  color: #fff;
+  font-weight: 700;
+}
+.home-brewing-divider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+}
+.home-brewing-store-tag {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: #efd064;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* Fulfillment choices inside home-hero */
+.home-hero .fulfillment-choices {
+  margin: 0 16px 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.home-hero .fulfillment-choices button.choice-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.home-hero .fulfillment-choices button.choice-card:active {
+  transform: scale(0.98);
+}
+.home-hero .fulfillment-choices button.choice-card.active,
+.home-hero .fulfillment-choices button.choice-card:first-child {
+  background: #432e22;
+  border-color: #593e2e;
+  color: #fff;
+}
+.home-hero .choice-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.home-hero .choice-icon-wrap.pickup {
+  background: rgba(239, 208, 100, 0.18);
+  color: #efd064;
+}
+.home-hero .choice-icon-wrap.delivery {
+  background: #f4eee8;
+  color: #593e2e;
+}
+.home-hero .choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.home-hero .choice-text strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.home-hero .choice-card:first-child .choice-text strong {
+  color: #fff;
+}
+.home-hero .choice-card:not(:first-child) .choice-text strong {
+  color: #2b1d14;
+}
+.home-hero .choice-text small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-hero .choice-card:first-child .choice-text small {
+  color: #ded1c4;
+}
+.home-hero .choice-card:not(:first-child) .choice-text small {
+  color: #7d6b5e;
+}
+
 /* Home and supporting customer flows */
 .home-page {
   min-height: 100%;
