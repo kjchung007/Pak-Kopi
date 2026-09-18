@@ -7,7 +7,21 @@ import type {SiteDocument} from '@coffee/brand/website';
 export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editing:boolean;orderUrl:string}){
  const site=useEditingPreview(initial,editing);
  const stores=site.stores||[]; const products=site.products||[];
-  const branches = stores.filter(store => store.featured ?? /Bandar Sandakan|Prima Sandakan/.test(store.name));
+ const explicitFeatured = stores.filter(store => store.featured);
+ const preferred = stores.filter(store =>
+  /Bandar Sandakan|Prima Sandakan|Prima Square|Batu 6|Kuching Town/i.test(store.name)
+ );
+ const pool = [
+  ...explicitFeatured,
+  ...preferred,
+  ...stores.filter(s => s.image && !s.image.includes('placeholder'))
+ ];
+ const seen = new Set<number>();
+ const branches = pool.filter(s => {
+  if (seen.has(s.id)) return false;
+  seen.add(s.id);
+  return true;
+ }).slice(0, 2);
 
   return <main className="pak-home">
     <section className="home-banner" aria-labelledby="home-heading">
@@ -39,7 +53,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     <section className="home-branches">
       <div className="home-section-title"><h2>{site.copy["home-18"]}</h2><p>{site.copy["home-19"]}</p></div>
       <div className="home-branch-grid">{branches.map(store => <Link href="/stores" className="home-branch" key={store.id}>
-        <div><img src={store.image} alt={`${store.name} storefront`} loading="lazy" width={680} height={510} /></div>
+        <div><img src={store.image || brand.storePlaceholder} alt={`${store.name} storefront`} loading="lazy" width={680} height={510} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=brand.storePlaceholder}} /></div>
         <h3>{store.name}</h3>
       </Link>)}</div>
     </section>
