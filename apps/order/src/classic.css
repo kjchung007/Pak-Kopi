@@ -66,4 +66,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #8063
 .topbar.topbar-home .icon-button{color:#fff!important;background:rgba(255,255,255,.15)!important;border-color:rgba(255,255,255,.25)!important}
 .home-hero .home-welcome{background:transparent!important;color:#fff!important}
 .home-hero .home-welcome p,.home-hero .home-welcome small,.home-hero .home-welcome span{color:#ded6cc}
+.home-hero .fulfillment-choices{margin:0 16px!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;width:calc(100% - 32px)!important;box-sizing:border-box!important}
+.home-hero .fulfillment-choices button.choice-card{min-width:0!important;width:100%!important;box-sizing:border-box!important;overflow:hidden!important;padding:10px 12px!important;min-height:64px!important}
+.home-hero .choice-text{min-width:0!important;flex:1!important;overflow:hidden!important}
+.home-hero .choice-text small{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block!important;max-width:100%!important}
+
 

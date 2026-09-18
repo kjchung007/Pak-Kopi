@@ -788,23 +788,30 @@ legend {
 
 /* Fulfillment choices inside home-hero */
 .home-hero .fulfillment-choices {
-  margin: 0 16px 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  margin: 0 16px 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  width: calc(100% - 32px) !important;
+  max-width: 100% !important;
 }
 .home-hero .fulfillment-choices button.choice-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 72px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  text-align: left;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 64px !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .home-hero .fulfillment-choices button.choice-card:active {
@@ -812,57 +819,64 @@ legend {
 }
 .home-hero .fulfillment-choices button.choice-card.active,
 .home-hero .fulfillment-choices button.choice-card:first-child {
-  background: #432e22;
-  border-color: #593e2e;
-  color: #fff;
+  background: #432e22 !important;
+  border-color: #593e2e !important;
+  color: #fff !important;
 }
 .home-hero .choice-icon-wrap {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 10px;
   flex-shrink: 0;
 }
 .home-hero .choice-icon-wrap.pickup {
-  background: rgba(239, 208, 100, 0.18);
-  color: #efd064;
+  background: rgba(239, 208, 100, 0.18) !important;
+  color: #efd064 !important;
 }
 .home-hero .choice-icon-wrap.delivery {
-  background: #f4eee8;
-  color: #593e2e;
+  background: #f4eee8 !important;
+  color: #593e2e !important;
 }
 .home-hero .choice-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 .home-hero .choice-text strong {
   display: block;
-  font-size: 15px;
+  font-size: 14px !important;
   font-weight: 700;
   line-height: 1.2;
-}
-.home-hero .choice-card:first-child .choice-text strong {
-  color: #fff;
-}
-.home-hero .choice-card:not(:first-child) .choice-text strong {
-  color: #2b1d14;
-}
-.home-hero .choice-text small {
-  display: block;
-  font-size: 11px;
-  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.home-hero .choice-card:first-child .choice-text strong {
+  color: #fff !important;
+}
+.home-hero .choice-card:not(:first-child) .choice-text strong {
+  color: #2b1d14 !important;
+}
+.home-hero .choice-text small {
+  display: block;
+  font-size: 11px !important;
+  line-height: 1.25;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
 .home-hero .choice-card:first-child .choice-text small {
-  color: #ded1c4;
+  color: #ded1c4 !important;
 }
 .home-hero .choice-card:not(:first-child) .choice-text small {
-  color: #7d6b5e;
+  color: #7d6b5e !important;
 }
 
 /* Home and supporting customer flows */

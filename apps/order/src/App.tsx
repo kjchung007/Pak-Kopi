@@ -1672,10 +1672,10 @@ function HomePage({
             </div>
             <div className="choice-text">
               <strong>Pickup</strong>
-              <small>
+              <small title={selectedStore ? selectedStore.name : "Select a branch"}>
                 {selectedStore
-                  ? `${selectedStore.name} · ${storeHours(selectedStore)}`
-                  : "Select a branch to continue"}
+                  ? selectedStore.name
+                  : "Select a branch"}
               </small>
             </div>
           </button>
