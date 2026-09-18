@@ -74,7 +74,7 @@ begin
  if p_url !~ '^https://[a-z0-9.-]+\.sandbox\.hit-pay\.com/' then raise exception 'Sandbox checkout URL required';end if;
  update private.hitpay_attempts set request_id=p_request_id,checkout_url=p_url,state='ready' where order_id=p_order_id and token=p_token and request_id is null;
  if not found then raise exception 'Payment request could not be attached';end if;
- update public.orders set hitpay_payment_request_id=p_request_id,hitpay_checkout_url=p_url,payment_initiated_at=now(),payment_method='card' where id=p_order_id;
+ update public.orders set hitpay_payment_request_id=p_request_id,hitpay_checkout_url=p_url,payment_initiated_at=now() where id=p_order_id;
 end $$;
 
 create function public.verify_hitpay_result(p_request_id text,p_reference text,p_amount_cents integer,p_currency text,p_status text,p_webhook boolean default false) returns jsonb

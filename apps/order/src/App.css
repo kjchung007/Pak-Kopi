@@ -2664,6 +2664,8 @@ legend {
 .payment-method-head strong { margin-top:3px; text-transform:capitalize; overflow-wrap:anywhere; }
 .payment-brand { display:grid; place-items:center; width:52px; height:42px; color:#fff; background:var(--navy); border-radius:10px; font-size:12px; font-weight:900; }
 .payment-brand.touch_n_go { background:#1575c9; }
+.payment-brand.fpx { background:#173f8f; }
+.payment-brand.card { background:#26221f; }
 .payment-breakdown { display:grid; grid-template-columns:1fr auto; gap:11px 18px; padding:17px 0; font-size:13px; }
 .payment-breakdown strong { text-align:right; font-variant-numeric:tabular-nums; }
 .payment-breakdown .negative { color:#bd2b35; }
@@ -4754,18 +4756,22 @@ legend {
 }
 .payment-choices > button.selected {
   background: #fff;
-  border-color: var(--navy);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--brand-primary) 9%, transparent);
+  border-color: var(--brand-primary, #934228);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--brand-primary, #934228) 14%, transparent);
 }
 .payment-logo {
   display: grid;
   place-items: center;
   width: 48px;
   height: 42px;
-  border-radius: 9px;
+  border-radius: 10px;
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+}
+.card-logo {
+  color: #fff;
+  background: #26221f;
 }
 .fpx-logo {
   color: #fff;
@@ -4773,19 +4779,37 @@ legend {
 }
 .tng-logo {
   color: #fff;
-  background: #1869b5;
+  background: #015db9;
 }
 .payment-choices strong,
 .payment-choices small {
   display: block;
 }
 .payment-choices strong {
-  font-size: 12px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink, #1f1b16);
 }
 .payment-choices small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 9px;
+  margin-top: 3px;
+  color: var(--muted, #6d665d);
+  font-size: 11px;
+  font-weight: 500;
+}
+.payment-indicator {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--line, #e2dcd3);
+  border-radius: 50%;
+  background: #fff;
+  color: #fff;
+  transition: all 180ms ease;
+}
+.payment-indicator.checked {
+  border-color: var(--brand-primary, #934228);
+  background: var(--brand-primary, #934228);
 }
 .payment-choices i {
   display: grid;

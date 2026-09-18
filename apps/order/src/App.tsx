@@ -711,18 +711,28 @@ export default function App() {
       )
       .eq("user_id", currentUser.id)
       .order("created_at", { ascending: false });
-    const normalized = (data ?? []).map((order) => ({
-      ...order,
-      stores: Array.isArray(order.stores)
-        ? (order.stores[0] ?? null)
-        : order.stores,
-      order_items: order.order_items.map((line) => ({
-        ...line,
-        products: Array.isArray(line.products)
-          ? (line.products[0] ?? null)
-          : line.products,
-      })),
-    }));
+    const normalized = (data ?? []).map((order) => {
+      let method = order.payment_method;
+      try {
+        const stored = localStorage.getItem(`order_payment_method_${order.id}`);
+        if (stored === "card" || stored === "fpx" || stored === "touch_n_go") {
+          method = stored;
+        }
+      } catch {}
+      return {
+        ...order,
+        payment_method: method,
+        stores: Array.isArray(order.stores)
+          ? (order.stores[0] ?? null)
+          : order.stores,
+        order_items: order.order_items.map((line) => ({
+          ...line,
+          products: Array.isArray(line.products)
+            ? (line.products[0] ?? null)
+            : line.products,
+        })),
+      };
+    });
     setOrders(normalized as CustomerOrder[]);
     const pending = (normalized as CustomerOrder[])
       .filter(
@@ -1120,6 +1130,9 @@ export default function App() {
         return;
       }
       orderId = Number((created as { id: number }).id);
+      try {
+        localStorage.setItem(`order_payment_method_${orderId}`, paymentMethod);
+      } catch {}
       setPaymentDraft({
         fingerprint,
         orderId,
@@ -2366,8 +2379,27 @@ function OrderDetails({
           <section className="detail-card payment-detail enhanced-payment">
             <h3>Payment details</h3>
             <div className="payment-method-head">
-              <span className={`payment-brand ${order.payment_method ?? "unknown"}`}>{"Online"}</span>
-              <span><small>Payment method</small><strong>{"Online payment"}</strong></span>
+              <span className={`payment-brand ${order.payment_method ?? "unknown"}`}>
+                {order.payment_method === "card"
+                  ? "CARD"
+                  : order.payment_method === "fpx"
+                    ? "FPX"
+                    : order.payment_method === "touch_n_go"
+                      ? "TNG"
+                      : "Online"}
+              </span>
+              <span>
+                <small>Payment method</small>
+                <strong>
+                  {order.payment_method === "card"
+                    ? "Credit / Debit Card"
+                    : order.payment_method === "fpx"
+                      ? "Online Banking (FPX)"
+                      : order.payment_method === "touch_n_go"
+                        ? "Touch 'n Go eWallet"
+                        : "Online payment"}
+                </strong>
+              </span>
               <em className={`payment-status ${order.payment_status}`}>{order.payment_status === "paid" ? "Paid" : order.payment_status === "pending" ? "Verifying Payment" : order.payment_status}</em>
             </div>
             <div className="payment-breakdown">
@@ -3452,7 +3484,7 @@ function CheckoutPage({
       userVoucherId?: number;
       secretCode?: string;
     } | null>(null);
-  const paymentMethod = hitpaySandbox ? "card" as const : "fpx" as const;
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "fpx" | "touch_n_go">("card");
   const paymentBank = "demo";
   const activeVouchers = vouchers.filter(
     (v) =>
@@ -3760,7 +3792,86 @@ function CheckoutPage({
               </>
             )}
           </section>
-          <section className="checkout-section payment-method"><div className="checkout-heading"><h2>Payment</h2></div><p className="payment-security">Choose an available payment method at checkout.</p></section>
+          <section className="checkout-section payment-method">
+            <div className="checkout-heading">
+              <div>
+                <small>PAYMENT METHOD</small>
+                <h2>Choose how to pay</h2>
+              </div>
+              {hitpaySandbox && <span className="sandbox-chip">HitPay Sandbox</span>}
+            </div>
+            <div className="payment-choices" role="radiogroup" aria-label="Choose payment method">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={paymentMethod === "card"}
+                className={paymentMethod === "card" ? "selected" : ""}
+                onClick={() => setPaymentMethod("card")}
+              >
+                <span className="payment-logo card-logo">
+                  <Icon size={22}>
+                    <rect width="20" height="14" x="2" y="5" rx="2" />
+                    <line x1="2" x2="22" y1="10" y2="10" />
+                  </Icon>
+                </span>
+                <div>
+                  <strong>Credit / Debit Card</strong>
+                  <small>Visa, Mastercard, MyDebit</small>
+                </div>
+                <span className={`payment-indicator ${paymentMethod === "card" ? "checked" : ""}`}>
+                  {paymentMethod === "card" && (
+                    <Icon size={13}><path d="m5 12 5 5L20 7" /></Icon>
+                  )}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                role="radio"
+                aria-checked={paymentMethod === "fpx"}
+                className={paymentMethod === "fpx" ? "selected" : ""}
+                onClick={() => setPaymentMethod("fpx")}
+              >
+                <span className="payment-logo fpx-logo">FPX</span>
+                <div>
+                  <strong>Online Banking (FPX)</strong>
+                  <small>Maybank2u, CIMB, Public Bank & more</small>
+                </div>
+                <span className={`payment-indicator ${paymentMethod === "fpx" ? "checked" : ""}`}>
+                  {paymentMethod === "fpx" && (
+                    <Icon size={13}><path d="m5 12 5 5L20 7" /></Icon>
+                  )}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                role="radio"
+                aria-checked={paymentMethod === "touch_n_go"}
+                className={paymentMethod === "touch_n_go" ? "selected" : ""}
+                onClick={() => setPaymentMethod("touch_n_go")}
+              >
+                <span className="payment-logo tng-logo">TNG</span>
+                <div>
+                  <strong>Touch 'n Go eWallet</strong>
+                  <small>TnG eWallet & DuitNow QR</small>
+                </div>
+                <span className={`payment-indicator ${paymentMethod === "touch_n_go" ? "checked" : ""}`}>
+                  {paymentMethod === "touch_n_go" && (
+                    <Icon size={13}><path d="m5 12 5 5L20 7" /></Icon>
+                  )}
+                </span>
+              </button>
+            </div>
+            <p className="payment-security">
+              <Icon size={14}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </Icon>
+              {hitpaySandbox
+                ? "Secure sandbox payment. Use test credentials; no real charges."
+                : "Secure checkout. Choose your preferred payment method."}
+            </p>
+          </section>
           <section className="checkout-section cost-summary">
             <h2>Payment summary</h2>
             <div>
@@ -3785,7 +3896,7 @@ function CheckoutPage({
         </div>
         <footer>
           <button
-            disabled={busy || !cartItems.length || checking || (paymentMethod === "fpx" && !paymentBank)}
+            disabled={busy || !cartItems.length || checking}
             onClick={() =>
               placeOrder(
                 paymentMethod,
@@ -3800,7 +3911,9 @@ function CheckoutPage({
               )
             }
           >
-            {busy ? "Placing order…" : paymentMethod === "fpx" && !paymentBank ? "Select a bank to continue" : `Continue to payment · RM ${finalTotal.toFixed(2)}`}
+            {busy
+              ? "Placing order…"
+              : `Continue with ${paymentMethod === "card" ? "Card" : paymentMethod === "fpx" ? "FPX" : "Touch 'n Go"} · RM ${finalTotal.toFixed(2)}`}
           </button>
           
         </footer>
