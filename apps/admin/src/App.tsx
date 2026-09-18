@@ -1,6 +1,6 @@
 import {configureDemoUpdates} from '@coffee/brand/demo-client';
 import { brand } from '@coffee/brand';
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { ActivityLog, CustomerManagement, DangerZone, type CustomerRecord } from "./AdminControls";
 import { CurrentWebsiteEditor as WebsiteEditor } from "./CurrentWebsiteEditor";
@@ -986,6 +986,8 @@ function Shell({
                 placeholder={
                   page === "orders"
                     ? "Search order or customer"
+                    : page === "stores"
+                    ? "Search store by name, city, address..."
                     : "Search workspace"
                 }
               />
@@ -1038,6 +1040,8 @@ function Shell({
               setStores={setStores}
               team={team}
               setTeam={setTeam}
+              search={search}
+              setSearch={setSearch}
             />
           )}{" "}
           {page === "customers" && supabase && (
@@ -1847,22 +1851,66 @@ function StoreManagement({
   setStores,
   team,
   setTeam,
+  search = "",
+  setSearch,
 }: {
   identity: AdminIdentity;
   stores: Store[];
   setStores: import('react').Dispatch<import('react').SetStateAction<Store[]>>;
   team: StaffMember[];
   setTeam: (items: StaffMember[]) => void;
+  search?: string;
+  setSearch?: (query: string) => void;
 }) {
   const [selectedId, setSelectedId] = useState<number | null>(
       stores[0]?.id ?? 0,
     ),
     [error, setError] = useState(""),
-    [saved, setSaved] = useState(false);
+    [saved, setSaved] = useState(false),
+    [selectedState, setSelectedState] = useState<string>("all"),
+    [activeTab, setActiveTab] = useState<"details" | "team">("details");
+
   useEffect(() => {
     if (selectedId === 0 && stores[0]) setSelectedId(stores[0].id);
   }, [selectedId, stores]);
+
+  const stateCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const store of stores) {
+      const s = normalizeState(store.state) || "Unassigned";
+      counts[s] = (counts[s] || 0) + 1;
+    }
+    return counts;
+  }, [stores]);
+
+  const availableStates = useMemo(() => {
+    return Object.keys(stateCounts).sort();
+  }, [stateCounts]);
+
+  const filteredStores = useMemo(() => {
+    const query = (search || "").trim().toLowerCase();
+    return stores.filter((store) => {
+      if (selectedState !== "all") {
+        const s = normalizeState(store.state) || "Unassigned";
+        if (s !== selectedState) return false;
+      }
+      if (query) {
+        const matchName = (store.name || "").toLowerCase().includes(query);
+        const matchCity = (store.city || "").toLowerCase().includes(query);
+        const matchState = (store.state || "").toLowerCase().includes(query);
+        const matchAddress = (store.address || "").toLowerCase().includes(query);
+        return matchName || matchCity || matchState || matchAddress;
+      }
+      return true;
+    });
+  }, [stores, selectedState, search]);
+
   const selected = stores.find((store) => store.id === selectedId) ?? null;
+  const storeStaff = useMemo(() => {
+    if (!selected || selected.id <= 0) return [];
+    return team.filter((person) => person.storeId === selected.id);
+  }, [selected, team]);
+
   function change(patch: Partial<Store>) {
     if (!selected) return;
     setSaved(false);
@@ -1883,21 +1931,37 @@ function StoreManagement({
       closingTime: "22:00",
       acceptingPickup: false,
       active: true,
+      state: selectedState !== "all" ? selectedState : "",
+      city: "",
     };
     setStores([...stores, draft]);
     setSelectedId(draft.id);
+    setActiveTab("details");
   }
-  const [uploadingStore,setUploadingStore]=useState(false);
-  async function uploadStore(file:File){
-    if(!selected)return;
-    if(!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)||file.size>5_000_000){setError('Choose JPG, PNG, WebP or AVIF under 5 MB.');return;}
-    const target=selected.id;setUploadingStore(true);setError('');
-    try{const path=`stores/${crypto.randomUUID()}-${file.name.replace(/[^a-z0-9._-]/gi,'-')}`;
-    const {error}=await supabase!.storage.from('public-assets').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;
-    const image=supabase!.storage.from('public-assets').getPublicUrl(path).data.publicUrl;
-    setStores(stores.map(s=>s.id===target?{...s,image}:s));setSaved(false);
-    }catch(e){setError(e instanceof Error?e.message:'Image upload failed. Please retry.');}finally{setUploadingStore(false);}
+  const [uploadingStore, setUploadingStore] = useState(false);
+  async function uploadStore(file: File) {
+    if (!selected) return;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type) || file.size > 5_000_000) {
+      setError('Choose JPG, PNG, WebP or AVIF under 5 MB.');
+      return;
+    }
+    const target = selected.id;
+    setUploadingStore(true);
+    setError('');
+    try {
+      const path = `stores/${crypto.randomUUID()}-${file.name.replace(/[^a-z0-9._-]/gi, '-')}`;
+      const { error } = await supabase!.storage.from('public-assets').upload(path, file, { contentType: file.type, upsert: false });
+      if (error) throw error;
+      const image = supabase!.storage.from('public-assets').getPublicUrl(path).data.publicUrl;
+      setStores(stores.map(s => s.id === target ? { ...s, image } : s));
+      setSaved(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Image upload failed. Please retry.');
+    } finally {
+      setUploadingStore(false);
+    }
   }
+
   async function save() {
     if (!selected) return;
     setError("");
@@ -1906,14 +1970,25 @@ function StoreManagement({
       setError("Choose both opening and closing times.");
       return;
     }
-    if(selected.mapsUrl?.trim() && !mapsLink(selected.mapsUrl)){
+    if (selected.mapsUrl?.trim() && !mapsLink(selected.mapsUrl)) {
       setError('Use an HTTPS Google Maps share link or place URL for Directions.');
       return;
     }
-    if(!malaysiaStates.includes(normalizeState(selected.state))){setError('Choose the branch state or territory.');return;}
-    if((selected.latitude==null)!==(selected.longitude==null)|| (selected.latitude!=null&&(!Number.isFinite(selected.latitude)||Math.abs(selected.latitude)>90))||(selected.longitude!=null&&(!Number.isFinite(selected.longitude)||Math.abs(selected.longitude)>180))){setError('Enter both valid latitude and longitude, or leave both empty.');return;}
+    if (!malaysiaStates.includes(normalizeState(selected.state))) {
+      setError('Choose the branch state or territory.');
+      return;
+    }
+    if ((selected.latitude == null) !== (selected.longitude == null) || (selected.latitude != null && (!Number.isFinite(selected.latitude) || Math.abs(selected.latitude) > 90)) || (selected.longitude != null && (!Number.isFinite(selected.longitude) || Math.abs(selected.longitude) > 180))) {
+      setError('Enter both valid latitude and longitude, or leave both empty.');
+      return;
+    }
     const payload = {
-      image_url: selected.image || null, maps_url: selected.mapsUrl?.trim() || null, state: selected.state?.trim() || '', city: selected.city?.trim() || '', latitude:selected.latitude??null, longitude:selected.longitude??null,
+      image_url: selected.image || null,
+      maps_url: selected.mapsUrl?.trim() || null,
+      state: selected.state?.trim() || '',
+      city: selected.city?.trim() || '',
+      latitude: selected.latitude ?? null,
+      longitude: selected.longitude ?? null,
       name: selected.name,
       address: selected.address,
       phone: selected.phone?.trim() || "",
@@ -1951,38 +2026,134 @@ function StoreManagement({
       }
     }
     setSaved(true);
-    window.setTimeout(() => setSaved(false), 1600);
+    window.setTimeout(() => setSaved(false), 2000);
   }
+
   return (
     <div className="store-master-detail">
       <section className="panel store-master">
-        <div className="tabs">
-          <div>
-            <button className="active">
-              Locations <b>{stores.length}</b>
+        <div className="store-master-header">
+          <div className="tabs">
+            <div>
+              <button className="active">
+                Locations <b>{filteredStores.length}</b>
+                {filteredStores.length !== stores.length && (
+                  <span className="store-count-total"> / {stores.length}</span>
+                )}
+              </button>
+            </div>
+            <button className="primary" onClick={add}>
+              + Add store
             </button>
           </div>
-          <button className="primary" onClick={add}>
-            + Add store
-          </button>
+          <div className="store-quick-search">
+            <Icon size={16}>
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </Icon>
+            <input
+              type="text"
+              placeholder="Search branch, city, state..."
+              value={search}
+              onChange={(e) => setSearch?.(e.target.value)}
+            />
+            {search ? (
+              <button
+                type="button"
+                className="store-search-clear"
+                onClick={() => setSearch?.("")}
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+          <div className="state-filter-chips">
+            <button
+              type="button"
+              className={`state-chip ${selectedState === "all" ? "active" : ""}`}
+              onClick={() => setSelectedState("all")}
+            >
+              All <b>{stores.length}</b>
+            </button>
+            {availableStates.map((st) => (
+              <button
+                key={st}
+                type="button"
+                className={`state-chip ${selectedState === st ? "active" : ""}`}
+                onClick={() => setSelectedState(st)}
+              >
+                {st} <b>{stateCounts[st]}</b>
+              </button>
+            ))}
+          </div>
         </div>
         <div className="store-master-list">
-          {stores.map((store) => (
-            <button
-              key={store.id}
-              className={store.id === selectedId ? "active" : ""}
-              onClick={() => setSelectedId(store.id)}
-            >
-              <span className="store-avatar">
-                {store.name.slice(0, 2).toUpperCase()}
-              </span>
-              <span>
-                <strong>{store.name}</strong>
-                <small>{store.address || "Address required"}</small>
-              </span>
-              <b>{store.acceptingPickup ? "Open" : "Paused"}</b>
-            </button>
-          ))}
+          {filteredStores.length === 0 ? (
+            <div className="empty-state store-empty-search">
+              <strong>No branches found</strong>
+              <p>No stores match your current search or state filter.</p>
+              {(search || selectedState !== "all") && (
+                <button
+                  type="button"
+                  className="button-link"
+                  onClick={() => {
+                    setSearch?.("");
+                    setSelectedState("all");
+                  }}
+                >
+                  Reset all filters
+                </button>
+              )}
+            </div>
+          ) : (
+            filteredStores.map((store) => (
+              <button
+                key={store.id}
+                className={store.id === selectedId ? "active" : ""}
+                onClick={() => {
+                  setSelectedId(store.id);
+                  if (activeTab === "team" && store.id < 0) setActiveTab("details");
+                }}
+              >
+                <span className="store-avatar">
+                  {store.image && (
+                    <img
+                      src={store.image}
+                      alt=""
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  )}
+                  <span className="store-avatar-initials">
+                    {store.name.slice(0, 2).toUpperCase()}
+                  </span>
+                </span>
+                <span className="store-card-body">
+                  <span className="store-card-name-row">
+                    <strong>{store.name}</strong>
+                  </span>
+                  <small className="store-region-pill">
+                    {normalizeState(store.state) || "Unassigned"}
+                    {store.city ? ` · ${store.city}` : ""}
+                  </small>
+                  <small className="store-address-snippet">
+                    {store.address || "Address required"}
+                  </small>
+                </span>
+                <span className="store-card-status">
+                  {!store.active ? (
+                    <b className="status-inactive">Inactive</b>
+                  ) : store.acceptingPickup ? (
+                    <b className="status-open">Open</b>
+                  ) : (
+                    <b className="status-paused">Paused</b>
+                  )}
+                </span>
+              </button>
+            ))
+          )}
         </div>
       </section>
       {selected && (
@@ -1997,131 +2168,304 @@ function StoreManagement({
                   <path d="m15 18-6-6 6-6" />
                 </Icon>
               </button>
-              <span>
-                <h2>{selected.id < 0 ? "Create store" : selected.name}</h2>
-                <p>Branch details and pickup controls</p>
-              </span>
+              <div className="detail-title-group">
+                <h2>{selected.id < 0 ? "Create new store" : selected.name}</h2>
+                <p>
+                  {normalizeState(selected.state) || "State unassigned"}
+                  {selected.city ? ` · ${selected.city}` : ""} · ID #{selected.id < 0 ? "Draft" : selected.id}
+                </p>
+              </div>
+              <div className="detail-heading-actions">
+                <button className="primary store-save-btn" onClick={save} disabled={uploadingStore}>
+                  {saved ? "Saved ✓" : "Save store"}
+                </button>
+              </div>
             </div>
             {error && (
               <div className="error" role="alert">
                 {error}
               </div>
             )}
-            <label className="image-picker">Branch photo
-              {selected.image&&<img src={selected.image} alt="Branch preview" style={{width:'100%',maxHeight:180,objectFit:'cover',borderRadius:8}}/>}
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={uploadingStore} onChange={e=>{const f=e.target.files?.[0];if(f)void uploadStore(f);}}/>
-              <small>{uploadingStore?'Uploading…':'Choose an image, then save the store.'}</small>
-            </label>
-            <div className="pair"><label>State / territory<select value={normalizeState(selected.state)} onChange={e=>change({state:e.target.value})}><option value="">Choose state</option>{malaysiaStates.map(s=><option key={s}>{s}</option>)}</select></label><label>City<input value={selected.city||''} onChange={e=>change({city:e.target.value})}/></label></div>
-            <StoreLocationPicker key={selected.id} latitude={selected.latitude} longitude={selected.longitude} mapsUrl={selected.mapsUrl} address={selected.address} onChange={change}/>
-            <label>
-              Store name
-              <input
-                value={selected.name}
-                onChange={(event) => change({ name: event.target.value })}
-              />
-            </label>
-            <label>
-              Address
-              <textarea
-                value={selected.address}
-                onChange={(event) => change({ address: event.target.value })}
-              />
-            </label>
-            <div className="pair">
-              <label>
-                Phone
-                <input
-                  value={selected.phone}
-                  onChange={(event) => change({ phone: event.target.value })}
-                />
-              </label>
-              <label>
-                Prep minutes
-                <input
-                  type="number"
-                  min="1"
-                  max="120"
-                  value={selected.preparationMinutes}
-                  onChange={(event) =>
-                    change({ preparationMinutes: Number(event.target.value) })
+
+            <div className="store-subtabs">
+              <button
+                type="button"
+                className={activeTab === "details" ? "active" : ""}
+                onClick={() => setActiveTab("details")}
+              >
+                Store Details & Location
+              </button>
+              {selected.id > 0 && (
+                <button
+                  type="button"
+                  className={activeTab === "team" ? "active" : ""}
+                  onClick={() => setActiveTab("team")}
+                >
+                  Store Team <b>{storeStaff.length}</b>
+                </button>
+              )}
+            </div>
+
+            {activeTab === "details" && (
+              <div className="store-config-flow">
+                {/* 1. Branch Details & Status */}
+                <div className="store-config-section">
+                  <div className="store-section-header">
+                    <h4>1. Branch Details & Status</h4>
+                  </div>
+                  <div className="store-status-toggles">
+                    <label className="setting-check">
+                      <span>
+                        <strong>Active location</strong>
+                        <small>Visible in customer branch picker.</small>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={selected.active}
+                        onChange={(event) => change({ active: event.target.checked })}
+                      />
+                    </label>
+                    <label className="setting-check">
+                      <span>
+                        <strong>Accept pickup orders</strong>
+                        <small>Allows customers to place orders at this branch.</small>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={selected.acceptingPickup}
+                        onChange={(event) =>
+                          change({ acceptingPickup: event.target.checked })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    Store name
+                    <input
+                      value={selected.name}
+                      placeholder="e.g. Bandar Sandakan"
+                      onChange={(event) => change({ name: event.target.value })}
+                    />
+                  </label>
+                  <div className="pair">
+                    <label>
+                      State / territory
+                      <select
+                        value={normalizeState(selected.state)}
+                        onChange={(e) => change({ state: e.target.value })}
+                      >
+                        <option value="">Choose state</option>
+                        {malaysiaStates.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      City
+                      <input
+                        value={selected.city || ""}
+                        placeholder="e.g. Sandakan"
+                        onChange={(e) => change({ city: e.target.value })}
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    Full physical address
+                    <textarea
+                      value={selected.address}
+                      placeholder="Floor, building, mall, street address and postal code"
+                      onChange={(event) => change({ address: event.target.value })}
+                    />
+                  </label>
+                  <div className="pair">
+                    <label>
+                      Phone
+                      <input
+                        value={selected.phone}
+                        placeholder="e.g. 089-123456"
+                        onChange={(event) => change({ phone: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Prep minutes
+                      <input
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={selected.preparationMinutes}
+                        onChange={(event) =>
+                          change({ preparationMinutes: Number(event.target.value) })
+                        }
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* 2. Branch Photograph */}
+                <div className="store-config-section">
+                  <div className="store-section-header">
+                    <h4>2. Branch Photograph</h4>
+                    <small>High resolution storefront or counter image</small>
+                  </div>
+                  <div className="store-photo-card">
+                    {selected.image ? (
+                      <div className="store-photo-preview-wrap">
+                        <img
+                          src={selected.image}
+                          alt={selected.name}
+                          className="store-photo-img"
+                        />
+                        <div className="store-photo-overlay-actions">
+                          <label className="store-photo-btn store-photo-change-btn">
+                            {uploadingStore ? "Uploading…" : "Change image"}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/avif"
+                              disabled={uploadingStore}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) void uploadStore(f);
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className="store-photo-btn store-photo-remove-btn"
+                            onClick={() => change({ image: "" })}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="store-photo-placeholder">
+                        <Icon size={28}>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                        </Icon>
+                        <strong>{uploadingStore ? "Uploading…" : "Upload branch photo"}</strong>
+                        <span>JPG, PNG, WebP or AVIF under 5 MB</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/avif"
+                          disabled={uploadingStore}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) void uploadStore(f);
+                          }}
+                        />
+                      </label>
+                    )}
+                    <label className="store-photo-url-field">
+                      Image URL (optional)
+                      <input
+                        type="url"
+                        placeholder="https://... or /brand/..."
+                        value={selected.image || ""}
+                        onChange={(e) => change({ image: e.target.value })}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* 3. Location & Google Maps */}
+                <div className="store-config-section">
+                  <div className="store-section-header">
+                    <h4>3. Location & Google Maps</h4>
+                  </div>
+                  <StoreLocationPicker
+                    key={selected.id}
+                    latitude={selected.latitude}
+                    longitude={selected.longitude}
+                    mapsUrl={selected.mapsUrl}
+                    address={selected.address}
+                    onChange={change}
+                  />
+                </div>
+
+                {/* 4. Operating Hours */}
+                <div className="store-config-section">
+                  <div className="store-section-header">
+                    <h4>4. Operating Hours</h4>
+                  </div>
+                  <div className="store-hours">
+                    <p>
+                      These times are shown to customers and control ordering for this branch.
+                    </p>
+                    <div className="pair">
+                      <label>
+                        Opens
+                        <input
+                          type="time"
+                          required
+                          value={selected.openingTime}
+                          onChange={(event) =>
+                            change({ openingTime: event.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        Closes
+                        <input
+                          type="time"
+                          required
+                          value={selected.closingTime}
+                          onChange={(event) =>
+                            change({ closingTime: event.target.value })
+                          }
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. Team Bridge Card */}
+                {selected.id > 0 && (
+                  <div className="store-team-bridge-card">
+                    <div>
+                      <strong>Store Team Accounts</strong>
+                      <p>
+                        {storeStaff.length === 0
+                          ? "No staff accounts assigned to this store yet."
+                          : `${storeStaff.length} authorized team member${storeStaff.length > 1 ? "s" : ""} assigned.`}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="button-link"
+                      onClick={() => setActiveTab("team")}
+                    >
+                      Manage team accounts ({storeStaff.length}) →
+                    </button>
+                  </div>
+                )}
+
+                <div className="store-save-bar">
+                  <button className="primary" onClick={save} disabled={uploadingStore}>
+                    {saved ? "Saved ✓" : "Save store"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "team" && selected.id > 0 && (
+              <div className="store-team-pane">
+                <Team
+                  key={selected.id}
+                  identity={identity}
+                  stores={[selected]}
+                  team={team.filter((person) => person.storeId === selected.id)}
+                  reload={(next) =>
+                    setTeam([
+                      ...team.filter((person) => person.storeId !== selected.id),
+                      ...next,
+                    ])
                   }
                 />
-              </label>
-            </div>
-            <div className="store-hours">
-              <h3>Opening hours</h3>
-              <p>
-                These times are shown to customers and control ordering for this
-                branch.
-              </p>
-              <div className="pair">
-                <label>
-                  Opens
-                  <input
-                    type="time"
-                    required
-                    value={selected.openingTime}
-                    onChange={(event) =>
-                      change({ openingTime: event.target.value })
-                    }
-                  />
-                </label>
-                <label>
-                  Closes
-                  <input
-                    type="time"
-                    required
-                    value={selected.closingTime}
-                    onChange={(event) =>
-                      change({ closingTime: event.target.value })
-                    }
-                  />
-                </label>
               </div>
-            </div>
-            <label className="setting-check">
-              <span>
-                <strong>Accept pickup orders</strong>
-                <small>Controls this branch only.</small>
-              </span>
-              <input
-                type="checkbox"
-                checked={selected.acceptingPickup}
-                onChange={(event) =>
-                  change({ acceptingPickup: event.target.checked })
-                }
-              />
-            </label>
-            <label className="setting-check">
-              <span>
-                <strong>Active location</strong>
-                <small>Visible in customer store selection.</small>
-              </span>
-              <input
-                type="checkbox"
-                checked={selected.active}
-                onChange={(event) => change({ active: event.target.checked })}
-              />
-            </label>
-            <button className="primary" onClick={save}>
-              {saved ? "Saved" : "Save store"}
-            </button>
+            )}
           </section>
-          {selected.id > 0 && (
-            <Team
-              key={selected.id}
-              identity={identity}
-              stores={[selected]}
-              team={team.filter((person) => person.storeId === selected.id)}
-              reload={(next) =>
-                setTeam([
-                  ...team.filter((person) => person.storeId !== selected.id),
-                  ...next,
-                ])
-              }
-            />
-          )}
         </div>
       )}
     </div>
