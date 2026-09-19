@@ -112,7 +112,13 @@ export function SiteHeader({ orderUrl }: { orderUrl:string }) {
           <a className="nav-order" href={orderUrl}><Bag size={18} aria-hidden/>Order pickup</a>
         </nav>
       </header>
-      {open && <button className="nav-backdrop" type="button" aria-label="Close navigation" onClick={()=>setOpen(false)}/>}
+      <button
+        className={`nav-backdrop${open ? " open" : ""}`}
+        type="button"
+        aria-label="Close navigation"
+        tabIndex={open ? 0 : -1}
+        onClick={() => setOpen(false)}
+      />
     </>
   );
 }
