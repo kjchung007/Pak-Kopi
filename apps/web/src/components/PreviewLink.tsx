@@ -13,7 +13,7 @@ function InnerLink(props: ComponentProps<typeof Link>){
   const target='/preview'+href+(token?`?token=${encodeURIComponent(token)}`:'');
   return <Link {...props} href={target} prefetch={false}/>;
  }
- return <Link {...props}/>;
+ return <Link {...props} prefetch={props.prefetch ?? true}/>;
 }
 
 export default function PreviewLink(props:ComponentProps<typeof Link>){

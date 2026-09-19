@@ -12,14 +12,20 @@ export async function siteRequest(path:string,body?:unknown){
 }
 export const getSiteDocument=cache(async():Promise<SiteDocument>=>{
  let doc:Partial<SiteDocument>|undefined;
- if(await isDraftPreview()){
-  const headerList=await headers();
-  const token=headerList.get('x-pak-preview-token')||(await cookies()).get('pak-website-preview')?.value;
-  if(!token)throw new Error('Open a valid draft preview link from the admin Website Editor.');
-  doc=await siteRequest('rpc/read_website_preview',{p_token:token});
-  if(!doc)throw new Error('This draft preview link has expired. Open a new link from the Website Editor.');
- }else{
-  try{const rows=await siteRequest('website_public?select=content&id=eq.1');doc=rows[0]?.content;}catch{/* Original website remains available before setup. */}
- }
+  if(await isDraftPreview()){
+   const headerList=await headers();
+   const token=headerList.get('x-pak-preview-token')||(await cookies()).get('pak-website-preview')?.value;
+   if(token){
+     try{
+       doc=await siteRequest('rpc/read_website_preview',{p_token:token});
+     }catch{
+       try{const rows=await siteRequest('website_public?select=content&id=eq.1');doc=rows[0]?.content;}catch{}
+     }
+   }else{
+     try{const rows=await siteRequest('website_public?select=content&id=eq.1');doc=rows[0]?.content;}catch{}
+   }
+  }else{
+   try{const rows=await siteRequest('website_public?select=content&id=eq.1');doc=rows[0]?.content;}catch{/* Original website remains available before setup. */}
+  }
  return {...defaultSite,...doc,copy:{...defaultSite.copy,...doc?.copy},images:{...defaultSite.images,...doc?.images}};
 });

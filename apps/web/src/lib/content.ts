@@ -20,7 +20,7 @@ async function rest<T>(table: string, params: Record<string, string>): Promise<T
   const endpoint = new URL(`${url}/rest/v1/${table}`);
   Object.entries(params).forEach(([name, value]) => endpoint.searchParams.set(name, value));
   try {
-    const response = await fetch(endpoint, { headers: { apikey: key, Authorization: `Bearer ${key}` }, ...(table==='stores'?{cache:'no-store' as const}:{next:{revalidate:60}}), signal: AbortSignal.timeout(6000) });
+    const response = await fetch(endpoint, { headers: { apikey: key, Authorization: `Bearer ${key}` }, next: { revalidate: 30 }, signal: AbortSignal.timeout(6000) });
     return response.ok ? await response.json() as T[] : [];
   } catch { return []; }
 }
