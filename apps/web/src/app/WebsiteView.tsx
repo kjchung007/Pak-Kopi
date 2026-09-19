@@ -391,32 +391,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
        </div>
      </section>
 
-     <section ref={introRef} className={`home-intro home-intro-animated${introVisible ? ' is-visible' : ''}`}>
-       <div className="home-intro-backdrop" aria-hidden="true">
-         <video
-           className="home-intro-video"
-           autoPlay
-           loop
-           muted
-           playsInline
-           poster="/brand/coffee-swirl.jpg"
-           onError={(e) => { e.currentTarget.style.display = 'none'; }}
-         >
-           <source src={site.images.introVideo || '/brand/coffee-swirl.mp4'} type="video/mp4" />
-           <source src="/brand/coffee-swirl.webm" type="video/webm" />
-         </video>
-         <div className="home-intro-overlay" />
-       </div>
-       <div className="home-intro-content">
-         <h2>
-           <span className="intro-line intro-line-1">{site.copy["home-5"]}</span>
-           <span className="intro-line intro-line-2">{site.copy["home-6"]}</span>
-           <span className="intro-line intro-line-3">{site.copy["home-7"]}</span>
-         </h2>
-         <p className="intro-description">{site.copy["home-8"]}<br />{site.copy["home-9"]}</p>
-       </div>
-     </section>
-
      <section className="home-brew" aria-labelledby="brew-heading">
        <div className="home-brew-photos">
          <div
@@ -480,6 +454,32 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
           <div><img src={store.image || brand.storePlaceholder} alt="Pak Kopi storefront" loading="lazy" width={680} height={510} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src=brand.storePlaceholder}} /></div>
         </Link>
       ))}</div>
+    </section>
+
+    <section ref={introRef} className={`home-intro home-intro-animated${introVisible ? ' is-visible' : ''}`}>
+      <div className="home-intro-backdrop" aria-hidden="true">
+        <video
+          className="home-intro-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/brand/coffee-swirl.jpg"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        >
+          <source src={site.images.introVideo || '/brand/coffee-swirl.mp4'} type="video/mp4" />
+          <source src="/brand/coffee-swirl.webm" type="video/webm" />
+        </video>
+        <div className="home-intro-overlay" />
+      </div>
+      <div className="home-intro-content">
+        <h2>
+          <span className="intro-line intro-line-1">{site.copy["home-5"]}</span>
+          <span className="intro-line intro-line-2">{site.copy["home-6"]}</span>
+          <span className="intro-line intro-line-3">{site.copy["home-7"]}</span>
+        </h2>
+        <p className="intro-description">{site.copy["home-8"]}<br />{site.copy["home-9"]}</p>
+      </div>
     </section>
 
     <section className="home-pickup"><h2>{site.copy["home-21"]}</h2><p>{site.copy["home-22"]}</p><a className="home-button" href={orderUrl}>{site.copy["home-23"]}</a></section>
