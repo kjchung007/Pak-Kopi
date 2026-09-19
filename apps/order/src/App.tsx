@@ -34,6 +34,8 @@ type MenuItem = {
   price: number;
   image: string;
   badge?: string;
+  temperatures?: string[];
+  sizes?: { name: string; price_delta_cents: number }[];
 };
 type MenuCategory = { name: string; image: string };
 type AppTab = "home" | "menu" | "orders" | "rewards" | "profile";
@@ -319,6 +321,7 @@ export default function App() {
   const [temperature, setTemperature] = useState("Iced");
   const [drinkSize, setDrinkSize] = useState("Regular");
   const [sheetQuantity, setSheetQuantity] = useState(1);
+  const [editingLine, setEditingLine] = useState<CartLine | null>(null);
   const [slide, setSlide] = useState(0);
   const [auth, setAuth] = useState<AuthState>("none");
   const [authOpen, setAuthOpen] = useState(false);
@@ -362,7 +365,7 @@ export default function App() {
         supabase
           .from("products")
           .select(
-            "id,name,description,price_cents,image_url,badge,categories(name)",
+            "id,name,description,price_cents,image_url,badge,temperature_options,size_options,categories(name)",
           )
           .eq("available", true)
           .order("sort_order"),
@@ -402,6 +405,12 @@ export default function App() {
             image: row.image_url ?? "",
             badge: row.badge ?? undefined,
             category: row.categories?.name ?? "Other",
+            temperatures: Array.isArray(row.temperature_options) && row.temperature_options.length > 0
+              ? row.temperature_options
+              : ["Iced", "Hot"],
+            sizes: Array.isArray(row.size_options) && row.size_options.length > 0
+              ? row.size_options
+              : [{ name: "Regular", price_delta_cents: 0 }, { name: "Large", price_delta_cents: 100 }],
           })),
       );
       setCategories(
@@ -856,9 +865,11 @@ export default function App() {
       id: line.itemId,
       name: line.itemName,
       image: line.image,
-      price: line.unitPrice,
+      price: line.unitPrice - (line.size.startsWith("Large") ? 1 : 0),
       category: "",
       description: "",
+      temperatures: ["Iced", "Hot"],
+      sizes: [{ name: "Regular", price_delta_cents: 0 }, { name: "Large", price_delta_cents: 100 }],
     },
   }));
   const selectedStoreIsOpen = isStoreOpen(selectedStore, currentMinutes);
@@ -868,7 +879,20 @@ export default function App() {
     setAuthView("login");
     setAuthOpen(true);
   };
+
+  const getSelectedSizeDelta = (sizeStr: string, item?: MenuItem | null): number => {
+    if (item?.sizes && item.sizes.length > 0) {
+      const baseName = sizeStr.split(" +")[0].trim();
+      const match = item.sizes.find((s) => s.name === baseName);
+      if (match && typeof match.price_delta_cents === "number") {
+        return match.price_delta_cents / 100;
+      }
+    }
+    return sizeStr.startsWith("Large") ? 1 : 0;
+  };
+
   const makeLine = (item: MenuItem): CartLine => {
+    const delta = getSelectedSizeDelta(drinkSize, item);
     const key = `${item.id}-${temperature}-${drinkSize}`;
     return {
       key,
@@ -876,7 +900,7 @@ export default function App() {
       quantity: sheetQuantity,
       temperature,
       size: drinkSize,
-      unitPrice: item.price + (drinkSize.startsWith("Large") ? 1 : 0),
+      unitPrice: item.price + delta,
       itemName: item.name,
       image: item.image,
       source: "menu",
@@ -898,9 +922,56 @@ export default function App() {
     }
     const line = makeLine(item);
     setSelectedItem(null);
+    setEditingLine(null);
     setSheetQuantity(1);
     if (auth === "none") openAuth({ kind: "add", line });
     else addLine(line);
+  };
+
+  const saveCustomization = (item: MenuItem) => {
+    if (!selectedStoreIsOpen) {
+      setAuthError(
+        `This store is closed. Ordering resumes at ${displayTime(selectedStore?.opening_time)}.`,
+      );
+      return;
+    }
+    if (editingLine) {
+      const delta = getSelectedSizeDelta(drinkSize, item);
+      const newKey = `${item.id}-${temperature}-${drinkSize}`;
+      const unitPrice = item.price + delta;
+      setCart((current) => {
+        const next = { ...current };
+        if (editingLine.key !== newKey) {
+          delete next[editingLine.key];
+          const existing = next[newKey];
+          next[newKey] = {
+            key: newKey,
+            itemId: item.id,
+            quantity: existing ? existing.quantity + sheetQuantity : sheetQuantity,
+            temperature,
+            size: drinkSize,
+            unitPrice,
+            itemName: item.name,
+            image: item.image,
+            source: existing?.source ?? editingLine.source ?? "menu",
+          };
+        } else {
+          next[editingLine.key] = {
+            ...next[editingLine.key],
+            quantity: sheetQuantity,
+            temperature,
+            size: drinkSize,
+            unitPrice,
+          };
+        }
+        return next;
+      });
+      setSelectedItem(null);
+      setEditingLine(null);
+      setSheetQuantity(1);
+    } else {
+      gatedAdd(item);
+    }
   };
   const resumePending = () => {
     setAuth("email");
@@ -1106,12 +1177,22 @@ export default function App() {
         ? paymentDraft.orderId
         : null;
     if (!orderId) {
-      const payload = cartItems.map(({ item, line }) => ({
-        product_id: item.id,
-        quantity: line.quantity,
-        customization: { temperature: line.temperature, size: line.size },
-        source: line.source ?? "menu",
-      }));
+      const payload = cartItems.map(({ item, line }) => {
+        let temp = line.temperature;
+        const validTemps =
+          item.temperatures && item.temperatures.length > 0
+            ? item.temperatures
+            : ["Iced", "Hot"];
+        if (!validTemps.includes(temp)) {
+          temp = validTemps.includes("Iced") ? "Iced" : validTemps[0];
+        }
+        return {
+          product_id: item.id,
+          quantity: line.quantity,
+          customization: { temperature: temp, size: line.size },
+          source: line.source ?? "menu",
+        };
+      });
       const { data: created, error } = await supabase.rpc(
         "create_pickup_order",
         {
@@ -1342,7 +1423,13 @@ export default function App() {
       <BottomNav tab={tab} requestTab={requestTab} menuLocked={!fulfillment} />
 
       {selectedItem && (
-        <BottomSheet close={() => setSelectedItem(null)}>
+        <BottomSheet
+          close={() => {
+            setSelectedItem(null);
+            setEditingLine(null);
+            setSheetQuantity(1);
+          }}
+        >
           <section
             className="customization-sheet"
             role="dialog"
@@ -1351,7 +1438,11 @@ export default function App() {
           >
             <button
               className="sheet-close"
-              onClick={() => setSelectedItem(null)}
+              onClick={() => {
+                setSelectedItem(null);
+                setEditingLine(null);
+                setSheetQuantity(1);
+              }}
               aria-label="Close customization"
             >
               <Icon>
@@ -1360,12 +1451,22 @@ export default function App() {
             </button>
             {selectedItem.image && <img src={selectedItem.image} alt="" />}
             <div className="sheet-content">
+              {editingLine && (
+                <div className="sheet-editing-badge">Customizing item in order</div>
+              )}
               <h2 id="customize-title">{selectedItem.name}</h2>
               <p>{selectedItem.description}</p>
               <fieldset>
                 <legend>Temperature</legend>
                 <div className="choice-row">
-                  {["Iced", "Hot"].map((choice) => (
+                  {Array.from(
+                    new Set([
+                      ...(selectedItem.temperatures && selectedItem.temperatures.length > 0
+                        ? selectedItem.temperatures
+                        : ["Iced", "Hot"]),
+                      ...(temperature ? [temperature] : []),
+                    ]),
+                  ).map((choice) => (
                     <button
                       type="button"
                       className={temperature === choice ? "active" : ""}
@@ -1422,16 +1523,18 @@ export default function App() {
               <button
                 className="sheet-add"
                 disabled={!selectedStoreIsOpen}
-                onClick={() => gatedAdd(selectedItem)}
+                onClick={() => saveCustomization(selectedItem)}
               >
                 <span>
                   {selectedStoreIsOpen
-                    ? `Add ${sheetQuantity} to cart`
+                    ? editingLine
+                      ? "Update item"
+                      : `Add ${sheetQuantity} to cart`
                     : "Store closed"}
                 </span>
                 <strong>
                   {selectedStoreIsOpen
-                    ? `RM ${((selectedItem.price + (drinkSize.startsWith("Large") ? 1 : 0)) * sheetQuantity).toFixed(2)}`
+                    ? `RM ${((selectedItem.price + getSelectedSizeDelta(drinkSize, selectedItem)) * sheetQuantity).toFixed(2)}`
                     : storeHours(selectedStore)}
                 </strong>
               </button>
@@ -1524,18 +1627,46 @@ export default function App() {
             })
           }
           addRecommended={(item) => {
-            const key = `${item.id}-Standard-Regular`;
+            const defaultTemp =
+              item.temperatures && item.temperatures.length > 0
+                ? item.temperatures.includes("Iced")
+                  ? "Iced"
+                  : item.temperatures[0]
+                : "Iced";
+            const defaultSize = item.sizes?.[0]?.name ?? "Regular";
+            const delta = getSelectedSizeDelta(defaultSize, item);
+            const key = `${item.id}-${defaultTemp}-${defaultSize}`;
             addLine({
               key,
               itemId: item.id,
               quantity: 1,
-              temperature: "Standard",
-              size: "Regular",
-              unitPrice: item.price,
+              temperature: defaultTemp,
+              size: defaultSize,
+              unitPrice: item.price + delta,
               itemName: item.name,
               image: item.image,
               source: "upsell",
             });
+          }}
+          openEditItem={(item, line) => {
+            setEditingLine(line);
+            setTemperature(line.temperature);
+            setDrinkSize(line.size.startsWith("Large") ? "Large +RM 1.00" : "Regular");
+            setSheetQuantity(line.quantity);
+            setSelectedItem(item);
+          }}
+          openCustomize={(item) => {
+            const defaultTemp =
+              item.temperatures && item.temperatures.length > 0
+                ? item.temperatures.includes("Iced")
+                  ? "Iced"
+                  : item.temperatures[0]
+                : "Iced";
+            setEditingLine(null);
+            setTemperature(defaultTemp);
+            setDrinkSize("Regular");
+            setSheetQuantity(1);
+            setSelectedItem(item);
           }}
           addMore={() => {
             setCartOpen(false);
@@ -3449,6 +3580,8 @@ function CheckoutPage({
   updateQuantity,
   remove,
   addRecommended,
+  openEditItem,
+  openCustomize,
   addMore,
   close,
   placeOrder,
@@ -3464,6 +3597,8 @@ function CheckoutPage({
   updateQuantity: (key: string, delta: number) => void;
   remove: (key: string) => void;
   addRecommended: (item: MenuItem) => void;
+  openEditItem: (item: MenuItem, line: CartLine) => void;
+  openCustomize: (item: MenuItem) => void;
   addMore: () => void;
   close: () => void;
   placeOrder: (
@@ -3492,12 +3627,22 @@ function CheckoutPage({
       (!v.expires_at || new Date(v.expires_at).getTime() > Date.now()) &&
       v.voucher_templates,
   );
-  const itemPayload = cartItems.map(({ item, line }) => ({
-    product_id: item.id,
-    quantity: line.quantity,
-    customization: { temperature: line.temperature, size: line.size },
-    source: line.source ?? "menu",
-  }));
+  const itemPayload = cartItems.map(({ item, line }) => {
+    let temp = line.temperature;
+    const validTemps =
+      item.temperatures && item.temperatures.length > 0
+        ? item.temperatures
+        : ["Iced", "Hot"];
+    if (!validTemps.includes(temp)) {
+      temp = validTemps.includes("Iced") ? "Iced" : validTemps[0];
+    }
+    return {
+      product_id: item.id,
+      quantity: line.quantity,
+      customization: { temperature: temp, size: line.size },
+      source: line.source ?? "menu",
+    };
+  });
   const cartFingerprint = cartItems
     .map(({ line }) => `${line.key}:${line.quantity}`)
     .join("|");
@@ -3507,7 +3652,7 @@ function CheckoutPage({
       const { data } = await supabase
         .from("products")
         .select(
-          "id,name,description,price_cents,image_url,badge,sold,categories(name)",
+          "id,name,description,price_cents,image_url,badge,sold,temperature_options,size_options,categories(name)",
         )
         .eq("available", true)
         .order("sold", { ascending: false })
@@ -3531,6 +3676,12 @@ function CheckoutPage({
           image: row.image_url ?? "",
           badge: row.badge ?? undefined,
           category: row.categories?.name ?? "Other",
+          temperatures: Array.isArray(row.temperature_options) && row.temperature_options.length > 0
+            ? row.temperature_options
+            : ["Iced", "Hot"],
+          sizes: Array.isArray(row.size_options) && row.size_options.length > 0
+            ? row.size_options
+            : [{ name: "Regular", price_delta_cents: 0 }, { name: "Large", price_delta_cents: 100 }],
         })),
       );
     }
@@ -3634,20 +3785,30 @@ function CheckoutPage({
             <div className="checkout-lines">
               {cartItems.map(({ item, line }) => (
                 <article key={line.key}>
-                  {item.image ? (
-                    <img src={item.image} alt="" />
-                  ) : (
-                    <span className="cart-placeholder">
-                      {item.name.slice(0, 2)}
-                    </span>
-                  )}
-                  <div>
-                    <strong>{item.name}</strong>
-                    <small>
-                      {line.temperature} · {line.size}
-                    </small>
-                    <b>RM {(line.unitPrice * line.quantity).toFixed(2)}</b>
-                  </div>
+                  <button
+                    type="button"
+                    className="checkout-item-clickable"
+                    onClick={() => openEditItem(item, line)}
+                    aria-label={`Change customization for ${item.name}`}
+                  >
+                    {item.image ? (
+                      <img src={item.image} alt="" />
+                    ) : (
+                      <span className="cart-placeholder">
+                        {item.name.slice(0, 2)}
+                      </span>
+                    )}
+                    <div className="checkout-item-details">
+                      <div className="checkout-item-name-row">
+                        <strong>{item.name}</strong>
+                        <span className="checkout-edit-pill">Change</span>
+                      </div>
+                      <small>
+                        {line.temperature} · {line.size.split(" +")[0]}
+                      </small>
+                      <b>RM {(line.unitPrice * line.quantity).toFixed(2)}</b>
+                    </div>
+                  </button>
                   <div className="checkout-quantity">
                     <button
                       onClick={() => updateQuantity(line.key, -1)}
@@ -3690,7 +3851,20 @@ function CheckoutPage({
               </div>
               <div className="upsell-scroll">
                 {recommendations.map((item) => (
-                  <article key={item.id}>
+                  <article
+                    key={item.id}
+                    className="upsell-card-clickable"
+                    onClick={() => openCustomize(item)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openCustomize(item);
+                      }
+                    }}
+                    aria-label={`Customize and add ${item.name}`}
+                  >
                     {item.image ? (
                       <img src={item.image} alt="" />
                     ) : (
@@ -3699,7 +3873,11 @@ function CheckoutPage({
                     <strong>{item.name}</strong>
                     <small>RM {item.price.toFixed(2)}</small>
                     <button
-                      onClick={() => addRecommended(item)}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addRecommended(item);
+                      }}
                       aria-label={`Add ${item.name} to order`}
                     >
                       <Icon size={16}>
