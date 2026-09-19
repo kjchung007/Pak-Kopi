@@ -10,7 +10,10 @@
 .home-header .site-brand img{width:65px;height:76px}
 .home-header .site-brand strong{font-family:var(--brand-body);font-size:22px;font-weight:600;letter-spacing:-.03em;color:#161616}
 .home-header .site-brand small{display:none}
-.home-header nav{position:relative;gap:36px}
+.home-header nav{gap:36px}
+@media(min-width:761px){
+  .home-header nav{position:relative}
+}
 .home-header nav>a:not(.nav-order){color:#161616;font-size:16px;position:relative;transition:color .18s}
 .home-header nav>a:not(.nav-order):hover{color:var(--home-coffee)}
 .home-header nav>a:not(.nav-order)::after,
@@ -131,11 +134,41 @@
  .home-header .site-brand{gap:10px}
  .home-header .site-brand img{width:47px;height:60px}
  .home-header .site-brand strong{font-size:20px}
- .home-header nav{top:82px;left:0;right:0;padding:16px 20px 24px;border:0;border-bottom:1px solid #eae7e3;border-radius:0;background:#fff;box-shadow:none;gap:6px}
- .home-header nav>a:not(.nav-order){color:#161616;background:transparent;font-size:16px}
- .home-header nav>a:not(.nav-order):hover,.home-header nav>a.active{background:#f4f1ed}
- .home-header .nav-order{margin-top:10px}
- .home-header~.nav-backdrop{top:82px;background:rgba(0,0,0,.2);backdrop-filter:none}
+ .home-header nav{
+   position:fixed!important;
+   top:82px;
+   left:0;
+   right:0;
+   width:100%;
+   box-sizing:border-box;
+   display:grid;
+   padding:16px 20px 24px;
+   border:0;
+   border-bottom:1px solid #eae7e3;
+   border-radius:0;
+   background:#fff;
+   box-shadow:0 12px 28px rgba(0,0,0,.08);
+   gap:6px;
+   z-index:62;
+   transform-origin:top center;
+   transition:transform .22s cubic-bezier(.16,1,.3,1),opacity .2s ease,visibility .2s;
+ }
+ .home-header nav:not(.open){
+   opacity:0;
+   visibility:hidden;
+   pointer-events:none;
+   transform:translateY(-10px) scale(.99);
+ }
+ .home-header nav.open{
+   opacity:1;
+   visibility:visible;
+   pointer-events:auto;
+   transform:none;
+ }
+ .home-header nav>a:not(.nav-order){color:#161616;background:transparent;font-size:16px;text-align:center;padding:13px;border-radius:8px;transition:background .15s ease}
+ .home-header nav>a:not(.nav-order):hover,.home-header nav>a.active{background:#f4f1ed;color:#161616}
+ .home-header .nav-order{margin-top:10px;text-align:center;display:flex;justify-content:center}
+ .home-header~.nav-backdrop{position:fixed;inset:82px 0 0;top:82px;background:rgba(0,0,0,.25);backdrop-filter:none;z-index:55}
  .home-banner{height:auto;min-height:0;padding-bottom:340px}
  .home-banner-copy{max-width:none;text-align:center;padding:48px 24px 25px}
  .home-banner h1{font-size:43px;line-height:1.1;margin-bottom:17px}

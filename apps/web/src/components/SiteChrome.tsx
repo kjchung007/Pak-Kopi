@@ -26,6 +26,10 @@ export function SiteHeader({ orderUrl }: { orderUrl:string }) {
   }, [path]);
 
   const updateIndicator = useCallback(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 760) {
+      setIndicator({ left: 0, top: 0, width: 0, visible: false });
+      return;
+    }
     const nav = navRef.current;
     if (!nav) return;
 
