@@ -81,9 +81,9 @@ body{background:#fff}
 .inner-page .category-jump a:hover{background:#fff}
 @media(max-width:760px){
  :root{--website-header-height:82px}
- .pak-home .home-banner{padding-bottom:0}
+ .pak-home .home-banner{height:calc(100vh - var(--website-header-height));height:calc(100lvh - var(--website-header-height));min-height:calc(100vh - var(--website-header-height));min-height:calc(100lvh - var(--website-header-height));padding-bottom:0}
  .pak-home .home-banner-copy{top:auto;transform:none;padding:clamp(24px,5svh,48px) 24px 16px}
- .pak-home .home-banner .home-banner-image{height:min(42svh,380px)!important;object-fit:contain;object-position:center bottom}
+ .pak-home .home-banner .home-banner-image{height:min(42vh,380px)!important;height:min(42lvh,380px)!important;object-fit:contain;object-position:center bottom}
  .inner-page .menu-hero{padding:clamp(25px,5svh,48px) 24px 0}
  .menu-hero .menu-hero-cup{top:clamp(270px,38svh,345px);height:900px}
  .menu-hero .menu-hero-edge{height:66px;width:160%;left:-30%}
@@ -92,7 +92,7 @@ body{background:#fff}
 @media(max-height:700px) and (max-width:760px){
  .pak-home .home-banner h1,.menu-hero .menu-hero-copy h1{font-size:34px}
  .pak-home .home-banner-copy p{margin-bottom:14px}
- .pak-home .home-banner .home-banner-image{height:38svh!important}
+ .pak-home .home-banner .home-banner-image{height:38vh!important;height:38lvh!important}
  .menu-hero .menu-hero-copy p{font-size:14px;line-height:1.4}
  .menu-hero .menu-hero-cup{top:235px}
 }
