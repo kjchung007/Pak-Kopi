@@ -4093,30 +4093,12 @@ legend {
   min-width: 0;
   gap: 3px;
 }
-.checkout-item-name-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.checkout-item-name-row > strong {
+.checkout-item-details > strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
   color: var(--brand-ink, #070c2a);
-}
-.checkout-edit-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--gold-dark, #8f6215);
-  background: rgba(212, 163, 89, 0.16);
-  padding: 1px 6px;
-  border-radius: 999px;
-  letter-spacing: 0.02em;
-  flex-shrink: 0;
 }
 .checkout-item-clickable small {
   color: var(--muted);

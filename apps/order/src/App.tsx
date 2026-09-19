@@ -3799,10 +3799,7 @@ function CheckoutPage({
                       </span>
                     )}
                     <div className="checkout-item-details">
-                      <div className="checkout-item-name-row">
-                        <strong>{item.name}</strong>
-                        <span className="checkout-edit-pill">Change</span>
-                      </div>
+                      <strong>{item.name}</strong>
                       <small>
                         {line.temperature} · {line.size.split(" +")[0]}
                       </small>
