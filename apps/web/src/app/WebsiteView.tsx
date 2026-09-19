@@ -149,7 +149,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     // Harmonic spring constants: natural period ~1.1s, smooth air damping
     const stiffness = 0.009;
     const damping = 0.978;
-    const gyro = p.hasHardwareGyro ? p.gyroTilt : 0;
+    const gyro = p.gyroTilt;
 
     for (const side of ['left', 'right'] as const) {
       const card = p[side];
@@ -182,7 +182,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
       rightCardRef.current.style.transform = `rotate(${p.right.angle.toFixed(2)}deg)`;
     }
 
-    if (active || (p.hasHardwareGyro && Math.abs(p.gyroTilt) > 0.08)) {
+    if (active) {
       p.reqId = requestAnimationFrame(runPhysics);
     } else {
       p.animating = false;
@@ -197,9 +197,16 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     }
   };
 
-  // iOS 13+ motion permission request (called on first user tap)
+  // iOS 13+ motion permission request (called on user gesture)
   const requestOrientationPermission = async () => {
-    if (typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> })?.requestPermission === 'function') {
+    if (typeof (DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> })?.requestPermission === 'function') {
+      try {
+        const res = await (DeviceMotionEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
+        if (res === 'granted') {
+          physicsRef.current.hasHardwareGyro = true;
+        }
+      } catch {}
+    } else if (typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> })?.requestPermission === 'function') {
       try {
         const res = await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
         if (res === 'granted') {
@@ -210,7 +217,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
   };
 
   const handlePointerDown = (side: 'left' | 'right', e: React.PointerEvent<HTMLDivElement>) => {
-    e.preventDefault();
     requestOrientationPermission();
 
     const p = physicsRef.current;
@@ -234,11 +240,10 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     const card = p[side];
     if (!card.isDragging) return;
 
-    // Moving finger to RIGHT (deltaX > 0) -> rotates clockwise (+)
-    // Moving finger to LEFT (deltaX < 0) -> rotates counter-clockwise (-)
+    // Inverted drag direction as requested by user
     const deltaX = e.clientX - card.dragStartX;
     const sensitivity = 0.18; // 100px drag = 18 degrees tilt
-    const newAngle = card.dragStartAngle + deltaX * sensitivity;
+    const newAngle = card.dragStartAngle - deltaX * sensitivity;
 
     // Clamp angle to realistic physical range [-32°, +32°]
     card.angle = Math.max(-32, Math.min(32, newAngle));
@@ -249,17 +254,19 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
       targetRef.current.style.transform = `rotate(${card.angle.toFixed(2)}deg)`;
     }
 
-    // Track flick velocity
+    // Track flick velocity (inverted to match drag direction)
     const now = performance.now();
     const dt = now - card.lastMoveTime;
     if (dt > 10) {
-      card.flickVelocity = ((e.clientX - card.lastMoveX) / dt) * 0.45;
+      card.flickVelocity = -((e.clientX - card.lastMoveX) / dt) * 0.45;
       card.lastMoveX = e.clientX;
       card.lastMoveTime = now;
     }
   };
 
   const handlePointerUp = (side: 'left' | 'right', e: React.PointerEvent<HTMLDivElement>) => {
+    requestOrientationPermission();
+
     const p = physicsRef.current;
     const card = p[side];
     if (!card.isDragging) return;
@@ -273,11 +280,11 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
 
     // Quick tap (< 6px movement) applies a swing impulse to THIS card only
     if (totalDragDistance < 6) {
-      const impulse = side === 'left' ? 1.85 : -1.85;
+      const impulse = side === 'left' ? -2.2 : 2.2;
       card.velocity += impulse;
     } else {
       // Released from drag: apply any flick velocity, then harmonic spring oscillates from current pulled angle
-      const clampedFlick = Math.max(-4, Math.min(4, card.flickVelocity));
+      const clampedFlick = Math.max(-5, Math.min(5, card.flickVelocity));
       card.velocity = clampedFlick;
     }
 
@@ -291,22 +298,85 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     if (leftCardRef.current) leftCardRef.current.style.transform = `rotate(${p.left.rest}deg)`;
     if (rightCardRef.current) rightCardRef.current.style.transform = `rotate(${p.right.rest}deg)`;
 
-    function handleOrientation(e: DeviceOrientationEvent) {
-      if (e.gamma !== null && typeof e.gamma === 'number') {
-        p.hasHardwareGyro = true;
-        // gamma: -90 (tilted left) to +90 (tilted right)
-        const clamped = Math.max(-12, Math.min(12, e.gamma * 0.35));
-        p.gyroTilt = clamped;
-        startAnimation();
-      }
-    }
+    let lastMotionTime = 0;
 
-    if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
-      window.addEventListener('deviceorientation', handleOrientation);
+    // Primary: DeviceMotionEvent with accelerationIncludingGravity
+    // Provides exact gravity vector in screen plane with ZERO Euler gimbal lock in portrait mode
+    const handleMotion = (e: DeviceMotionEvent) => {
+      const acc = e.accelerationIncludingGravity;
+      if (!acc || acc.x === null || acc.y === null) return;
+
+      const now = performance.now();
+      if (now - lastMotionTime < 16) return;
+      lastMotionTime = now;
+
+      const ax = acc.x;
+      const ay = acc.y;
+
+      // Planar gravity angle in the phone's screen plane
+      const planarMag = Math.sqrt(ax * ax + ay * ay);
+      if (planarMag > 2.0) {
+        const angleRad = Math.atan2(-ax, -ay);
+        const angleDeg = angleRad * (180 / Math.PI);
+
+        // Clamped tilt response [-16°, +16°]
+        const clampedTilt = Math.max(-16, Math.min(16, angleDeg * 0.72));
+        if (Math.abs(clampedTilt - p.gyroTilt) > 0.12) {
+          p.hasHardwareGyro = true;
+          p.gyroTilt = clampedTilt;
+          startAnimation();
+        }
+      }
+    };
+
+    // Fallback: DeviceOrientationEvent
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (p.hasHardwareGyro) return;
+      if (e.gamma !== null && typeof e.gamma === 'number') {
+        const now = performance.now();
+        if (now - lastMotionTime < 16) return;
+        lastMotionTime = now;
+
+        const clampedTilt = Math.max(-16, Math.min(16, e.gamma * 0.7));
+        if (Math.abs(clampedTilt - p.gyroTilt) > 0.12) {
+          p.gyroTilt = clampedTilt;
+          startAnimation();
+        }
+      }
+    };
+
+    let listening = false;
+    const attachMotion = () => {
+      if (listening) return;
+      listening = true;
+      if (typeof window !== 'undefined') {
+        window.addEventListener('devicemotion', handleMotion, { passive: true });
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+      }
+    };
+
+    // Automatically attach listeners (works out of the box on Android & non-iOS)
+    attachMotion();
+
+    // On iOS Safari, request motion permission on first user tap/touch anywhere
+    const onFirstUserGesture = async () => {
+      await requestOrientationPermission();
+      attachMotion();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('click', onFirstUserGesture, { once: true });
+      window.addEventListener('touchend', onFirstUserGesture, { once: true });
     }
 
     return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
+      listening = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('devicemotion', handleMotion);
+        window.removeEventListener('deviceorientation', handleOrientation);
+        window.removeEventListener('click', onFirstUserGesture);
+        window.removeEventListener('touchend', onFirstUserGesture);
+      }
       if (p.reqId) cancelAnimationFrame(p.reqId);
     };
   }, []);
