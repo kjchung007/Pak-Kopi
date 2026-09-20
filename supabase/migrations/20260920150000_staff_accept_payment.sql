@@ -2,6 +2,11 @@
 -- This accommodates customer payment method changes at counter (e.g. network issues during online payment -> switched to cash)
 -- as well as manual staff verification of payment.
 
+-- Ensure orders table permits all valid counter / verified payment methods
+alter table public.orders drop constraint if exists orders_payment_method_check;
+alter table public.orders add constraint orders_payment_method_check
+  check (payment_method is null or payment_method in ('fpx','touch_n_go','cash','card','other','verified'));
+
 create or replace function private.staff_accept_order_payment_impl(
   p_order_id bigint,
   p_payment_method text,
@@ -30,8 +35,13 @@ begin
     raise exception 'Cannot accept payment for a cancelled order';
   end if;
 
+  -- If staff verified existing online payment, keep existing payment method or default to 'other'
+  if v_method in ('verified', 'online') then
+    v_method := coalesce(nullif(v_order.payment_method, ''), 'other');
+  end if;
+
   if v_method not in ('cash','card','fpx','touch_n_go','other','verified') then
-    raise exception 'Invalid payment method';
+    v_method := 'other';
   end if;
 
   update public.orders

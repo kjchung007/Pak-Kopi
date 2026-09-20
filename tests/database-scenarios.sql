@@ -22,7 +22,22 @@ do $$declare o public.orders; begin
  select * into o from public.create_pickup_order('Unpaid customer','[{"product_id":1,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');
  if o.payment_status<>'pending' then raise exception 'Order should be pending';end if;
  select * into o from public.staff_accept_order_payment(o.id, 'cash', true);
- if o.payment_status<>'paid' or o.payment_method<>'cash' or o.status<>'preparing' then raise exception 'staff_accept_order_payment failed'; end if;
+ if o.payment_status<>'paid' or o.payment_method<>'cash' or o.status<>'preparing' then raise exception 'staff_accept_order_payment cash failed'; end if;
+
+ -- Test card payment acceptance
+ select * into o from public.create_pickup_order('Card customer','[{"product_id":1,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'touch_n_go');
+ select * into o from public.staff_accept_order_payment(o.id, 'card', true);
+ if o.payment_status<>'paid' or o.payment_method<>'card' or o.status<>'preparing' then raise exception 'staff_accept_order_payment card failed'; end if;
+
+ -- Test verified online payment acceptance (preserves touch_n_go)
+ select * into o from public.create_pickup_order('Verified customer','[{"product_id":1,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'touch_n_go');
+ select * into o from public.staff_accept_order_payment(o.id, 'verified', true);
+ if o.payment_status<>'paid' or o.payment_method<>'touch_n_go' or o.status<>'preparing' then raise exception 'staff_accept_order_payment verified failed'; end if;
+
+ -- Test fallback for unrecognized strings
+ select * into o from public.create_pickup_order('Other customer','[{"product_id":1,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');
+ select * into o from public.staff_accept_order_payment(o.id, 'some_unknown_gateway', true);
+ if o.payment_status<>'paid' or o.payment_method<>'other' or o.status<>'preparing' then raise exception 'staff_accept_order_payment unknown fallback failed'; end if;
 end$$;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000002',false);
 do $$begin
