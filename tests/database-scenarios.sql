@@ -56,8 +56,36 @@ update public.orders set status='ready' where id=1;
 do $$begin if not exists(select 1 from public.waiting_board_entries where order_id=1 and status='ready') then raise exception 'Ready board failed';end if;end$$;
 update public.orders set status='completed' where id=1;
 do $$begin
- if exists(select 1 from public.waiting_board_entries where order_id=1) then raise exception 'Collected order remained on board';end if;
- begin update public.orders set total_cents=1 where id=1;raise exception 'TEST expected price protection';exception when insufficient_privilege then null;end;
+  if exists(select 1 from public.waiting_board_entries where order_id=1) then raise exception 'Collected order remained on board';end if;
+  begin update public.orders set total_cents=1 where id=1;raise exception 'TEST expected price protection';exception when insufficient_privilege then null;end;
 end$$;
+
+-- Reset role to admin to configure reward_settings
+reset role;
+update public.reward_settings set stamp_enabled = true, stamp_threshold = 8 where id = true;
+update public.reward_accounts set stamp_count = 8 where user_id = '10000000-0000-0000-0000-000000000001';
+
+-- Switch to customer and claim stamp reward
+set role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',false);
+do $$
+declare
+  res jsonb;
+begin
+  select public.claim_stamp_reward() into res;
+  if (res->>'ok')::boolean is not true or (res->>'claimed')::integer <> 1 then
+    raise exception 'claim_stamp_reward failed: %', res;
+  end if;
+  if not exists(
+    select 1 from public.user_vouchers
+    where user_id = '10000000-0000-0000-0000-000000000001' and source = 'stamp_reward'
+  ) then
+    raise exception 'Stamp reward voucher not found in user_vouchers';
+  end if;
+  if (select stamp_count from public.reward_accounts where user_id = '10000000-0000-0000-0000-000000000001') <> 0 then
+    raise exception 'Stamps were not deducted';
+  end if;
+end $$;
+
 reset role;
 select set_config('request.jwt.claim.sub','',false);

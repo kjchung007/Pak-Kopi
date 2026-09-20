@@ -2565,8 +2565,19 @@ function OrderDetails({
   );
 }
 
-function StampCard({ count, target }: { count: number; target: number }) {
+function StampCard({
+  count,
+  target,
+  onClaim,
+  claiming = false,
+}: {
+  count: number;
+  target: number;
+  onClaim?: () => void;
+  claiming?: boolean;
+}) {
   const [animatedIndex, setAnimatedIndex] = useState(-1);
+  const isFull = count >= target;
   useEffect(() => {
     const key = "coffee-demo-last-seen-stamps",
       stored = window.localStorage.getItem(key);
@@ -2583,11 +2594,15 @@ function StampCard({ count, target }: { count: number; target: number }) {
     }
   }, [count, target]);
   return (
-    <section className="stamp-balance">
+    <section className={`stamp-balance ${isFull ? "card-completed" : ""}`}>
       <div className="stamp-heading">
-        <span>Your stamp card</span>
+        {isFull ? (
+          <span className="stamp-complete-badge">CARD COMPLETE! 🎉</span>
+        ) : (
+          <span>Your stamp card</span>
+        )}
         <strong>
-          {count}
+          {Math.min(count, target)}
           <i>/</i>
           {target}
         </strong>
@@ -2604,7 +2619,7 @@ function StampCard({ count, target }: { count: number; target: number }) {
             key={i}
           >
             <img src={brand.icon} alt={i < count ? "Collected stamp" : "Uncollected stamp"} />
-            {i === animatedIndex && (
+            {(i === animatedIndex || (isFull && i === target - 1)) && (
               <i className="stamp-sparks" aria-hidden="true">
                 <b />
                 <b />
@@ -2615,7 +2630,34 @@ function StampCard({ count, target }: { count: number; target: number }) {
           </span>
         ))}
       </div>
-      <p>Your next voucher is created automatically when the card is full.</p>
+      {isFull ? (
+        <div className="stamp-claim-banner">
+          <div className="stamp-claim-copy">
+            <strong>🎉 All {target} stamps collected!</strong>
+            <small>Claim your reward voucher to use on your next order.</small>
+          </div>
+          <button
+            type="button"
+            className="stamp-claim-btn"
+            onClick={onClaim}
+            disabled={claiming}
+          >
+            {claiming ? (
+              <span>Claiming your reward…</span>
+            ) : (
+              <>
+                <Icon size={18}>
+                  <path d="M5 7h14v3a2.5 2.5 0 0 0 0 5v3H5v-3a2.5 2.5 0 0 0 0-5V7Z" />
+                  <path d="M10 7v11" strokeDasharray="2 2" />
+                </Icon>
+                <span>Claim Free Voucher</span>
+              </>
+            )}
+          </button>
+        </div>
+      ) : (
+        <p>Your next voucher is created automatically when the card is full.</p>
+      )}
     </section>
   );
 }
@@ -2651,9 +2693,92 @@ function RewardsPage({
     [pendingStampVoucherId, setPendingStampVoucherId] = useState<number | null>(
       null,
     ),
-    [showFullStampBoard, setShowFullStampBoard] = useState(false);
+    [showFullStampBoard, setShowFullStampBoard] = useState(false),
+    [celebratedStampVoucher, setCelebratedStampVoucher] = useState<{
+      id: number;
+      title: string;
+      description?: string;
+    } | null>(null),
+    [claimingStamp, setClaimingStamp] = useState(false);
   const lastCelebratedId = useRef<number | null>(null),
-    celebrationTimers = useRef<number[]>([]);
+    celebrationTimers = useRef<number[]>([]),
+    autoClaimedRef = useRef(false);
+
+  const claimStamp = async () => {
+    if (claimingStamp) return;
+    setClaimingStamp(true);
+    setShowFullStampBoard(true);
+    try {
+      const { data, error } = await supabase.rpc("claim_stamp_reward");
+      if (error) {
+        console.warn("Could not claim stamp reward:", error.message);
+        message(error.message);
+        setShowFullStampBoard(false);
+      } else if (data?.ok && data?.claimed > 0) {
+        const firstVoucher = data.vouchers?.[0];
+        if (firstVoucher) {
+          setCelebratedStampVoucher({
+            id: Number(firstVoucher.id),
+            title: String(firstVoucher.title || "Free Signature Drink"),
+            description: firstVoucher.description
+              ? String(firstVoucher.description)
+              : undefined,
+          });
+          setPendingStampVoucherId(Number(firstVoucher.id));
+          try {
+            const key = "pak_kopi_celebrated_stamp_vouchers";
+            const seen = JSON.parse(localStorage.getItem(key) || "[]");
+            localStorage.setItem(
+              key,
+              JSON.stringify([...seen, Number(firstVoucher.id)]),
+            );
+          } catch {}
+        }
+        await refresh();
+        message("🎉 Stamp card complete! Voucher added to your wallet.");
+      } else if (data?.ok && data?.claimed === 0) {
+        setShowFullStampBoard(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setShowFullStampBoard(false);
+    } finally {
+      setClaimingStamp(false);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      settings.stamp_enabled &&
+      balance.stamp_count >= settings.stamp_threshold &&
+      !autoClaimedRef.current &&
+      !claimingStamp
+    ) {
+      autoClaimedRef.current = true;
+      void claimStamp();
+    }
+  }, [settings.stamp_enabled, balance.stamp_count, settings.stamp_threshold]);
+
+  useEffect(() => {
+    try {
+      const key = "pak_kopi_celebrated_stamp_vouchers";
+      const seen: number[] = JSON.parse(localStorage.getItem(key) || "[]");
+      const uncelebrated = vouchers.find(
+        (v) =>
+          v.source === "stamp_reward" &&
+          v.status === "active" &&
+          !seen.includes(v.id),
+      );
+      if (uncelebrated && !celebratedStampVoucher) {
+        setCelebratedStampVoucher({
+          id: uncelebrated.id,
+          title: uncelebrated.voucher_templates?.title || "Free Signature Drink",
+          description: uncelebrated.voucher_templates?.description,
+        });
+        localStorage.setItem(key, JSON.stringify([...seen, uncelebrated.id]));
+      }
+    } catch {}
+  }, [vouchers]);
   const now = Date.now(),
     active = vouchers.filter(
       (v) =>
@@ -2860,11 +2985,14 @@ function RewardsPage({
           {settings.stamp_enabled && (
             <StampCard
               count={
-                showFullStampBoard
+                showFullStampBoard ||
+                balance.stamp_count >= settings.stamp_threshold
                   ? settings.stamp_threshold
                   : balance.stamp_count
               }
               target={settings.stamp_threshold}
+              onClaim={claimStamp}
+              claiming={claimingStamp}
             />
           )}
           <form className="secret-code" onSubmit={claim}>
@@ -3039,6 +3167,63 @@ function RewardsPage({
               </button>
             </div>
           </section>
+        </div>
+      )}
+      {celebratedStampVoucher && (
+        <div
+          className="reward-modal-backdrop stamp-celebrate-backdrop"
+          onClick={() => {
+            setShowFullStampBoard(false);
+            setPendingStampVoucherId(null);
+            setNewVoucherId(celebratedStampVoucher.id);
+            setCelebratedStampVoucher(null);
+            setView("mine");
+          }}
+        >
+          <div
+            className="stamp-celebration-dialog"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="celebration-badge">
+              <img src={brand.icon} alt="" className="celebration-icon" />
+              <div className="sparkles-ring" aria-hidden="true">
+                <i /><i /><i /><i /><i /><i />
+              </div>
+            </div>
+            <span className="celebration-tag">Stamp Card Complete!</span>
+            <h2>You earned a free voucher!</h2>
+            <p>
+              Thank you for your loyalty. Your completed {settings.stamp_threshold}
+              -cup stamp card has unlocked:
+            </p>
+            <div className="celebrated-voucher-preview">
+              <Icon size={24}>
+                <path d="M5 7h14v3a2.5 2.5 0 0 0 0 5v3H5v-3a2.5 2.5 0 0 0 0-5V7Z" />
+                <path d="M10 7v11" strokeDasharray="2 2" />
+              </Icon>
+              <div>
+                <strong>{celebratedStampVoucher.title}</strong>
+                {celebratedStampVoucher.description && (
+                  <small>{celebratedStampVoucher.description}</small>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="celebration-action-btn"
+              onClick={() => {
+                setShowFullStampBoard(false);
+                setPendingStampVoucherId(null);
+                setNewVoucherId(celebratedStampVoucher.id);
+                setCelebratedStampVoucher(null);
+                setView("mine");
+              }}
+            >
+              View in My Rewards
+            </button>
+          </div>
         </div>
       )}
     </main>
