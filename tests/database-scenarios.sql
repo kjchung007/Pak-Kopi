@@ -12,9 +12,17 @@ do $$declare result public.orders;begin
  perform public.complete_demo_payment(result.id);
  perform public.complete_demo_payment(result.id);
  if (select count(*) from public.orders)<>1 then raise exception 'Payment retry duplicated order';end if;
- begin perform public.create_pickup_order('Bad','[{"product_id":21,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');raise exception 'TEST expected unavailable';exception when others then if sqlerrm='TEST expected unavailable' then raise;end if;end;
+ begin perform public.create_pickup_order('Bad','[{"product_id":999,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');raise exception 'TEST expected unavailable';exception when others then if sqlerrm='TEST expected unavailable' then raise;end if;end;
  begin perform public.create_pickup_order('Bad','[{"product_id":1,"quantity":0,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');raise exception 'TEST expected quantity error';exception when others then if sqlerrm='TEST expected quantity error' then raise;end if;end;
  begin perform public.create_pickup_order('Bad','[{"product_id":1,"quantity":1,"customization":{"size":"Free","temperature":"Iced"}}]',1,null,null,'fpx');raise exception 'TEST expected modifier error';exception when others then if sqlerrm='TEST expected modifier error' then raise;end if;end;
+end$$;
+-- Verify staff accepting payment when customer changes to cash at counter
+select set_config('request.jwt.claim.sub','20000000-0000-0000-0000-000000000001',false);
+do $$declare o public.orders; begin
+ select * into o from public.create_pickup_order('Unpaid customer','[{"product_id":1,"quantity":1,"customization":{"size":"Regular","temperature":"Iced"}}]',1,null,null,'fpx');
+ if o.payment_status<>'pending' then raise exception 'Order should be pending';end if;
+ select * into o from public.staff_accept_order_payment(o.id, 'cash', true);
+ if o.payment_status<>'paid' or o.payment_method<>'cash' or o.status<>'preparing' then raise exception 'staff_accept_order_payment failed'; end if;
 end$$;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000002',false);
 do $$begin
