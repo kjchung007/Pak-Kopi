@@ -14,14 +14,19 @@ export function SmoothScroll() {
       lerp: 0.085,
       smoothWheel: true,
       syncTouch: false,
-      anchors: true,
+      anchors: false,
       stopInertiaOnNavigate: true,
       respectReducedMotion: true,
       allowNestedScroll: true,
     });
 
+    (window as unknown as { __lenis?: Lenis }).__lenis = scroll;
+
     // Recreate on navigation so momentum cannot carry into the next page.
-    return () => scroll.destroy();
+    return () => {
+      delete (window as unknown as { __lenis?: Lenis }).__lenis;
+      scroll.destroy();
+    };
   }, [pathname]);
 
   return null;
