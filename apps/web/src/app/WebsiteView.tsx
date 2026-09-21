@@ -109,7 +109,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
    return () => observer.disconnect();
   }, []);
 
-  // Isolated Physics Pendulum Simulation & Multi-Sensor Tilt
+  // Isolated Physics Pendulum Simulation (Touch Drag & Tap Impulse)
   const leftCardRef = useRef<HTMLDivElement>(null);
   const rightCardRef = useRef<HTMLDivElement>(null);
 
@@ -136,10 +136,8 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
       lastMoveTime: 0,
       flickVelocity: 0,
     },
-    gyroTilt: 0,
     animating: false,
     reqId: 0,
-    hasHardwareGyro: false,
   });
 
   const runPhysics = () => {
@@ -149,7 +147,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     // Harmonic spring constants: natural period ~1.1s, smooth air damping
     const stiffness = 0.009;
     const damping = 0.978;
-    const gyro = p.gyroTilt;
 
     for (const side of ['left', 'right'] as const) {
       const card = p[side];
@@ -158,7 +155,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
         // While user is dragging this card, direct finger control remains active
         active = true;
       } else {
-        const targetRest = card.rest + gyro;
+        const targetRest = card.rest;
         const displacement = card.angle - targetRest;
 
         // Harmonic spring-damper equation
@@ -197,28 +194,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     }
   };
 
-  // iOS 13+ motion permission request (called on user gesture)
-  const requestOrientationPermission = async () => {
-    if (typeof (DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> })?.requestPermission === 'function') {
-      try {
-        const res = await (DeviceMotionEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
-        if (res === 'granted') {
-          physicsRef.current.hasHardwareGyro = true;
-        }
-      } catch {}
-    } else if (typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> })?.requestPermission === 'function') {
-      try {
-        const res = await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
-        if (res === 'granted') {
-          physicsRef.current.hasHardwareGyro = true;
-        }
-      } catch {}
-    }
-  };
-
   const handlePointerDown = (side: 'left' | 'right', e: React.PointerEvent<HTMLDivElement>) => {
-    requestOrientationPermission();
-
     const p = physicsRef.current;
     const card = p[side];
 
@@ -248,7 +224,7 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     // Clamp angle to realistic physical range [-32°, +32°]
     card.angle = Math.max(-32, Math.min(32, newAngle));
 
-    // Direct synchronous transform update for zero-latency 60/120fps tracking
+    // Direct synchronous transform update for zero-latency tracking
     const targetRef = side === 'left' ? leftCardRef : rightCardRef;
     if (targetRef.current) {
       targetRef.current.style.transform = `rotate(${card.angle.toFixed(2)}deg)`;
@@ -265,8 +241,6 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
   };
 
   const handlePointerUp = (side: 'left' | 'right', e: React.PointerEvent<HTMLDivElement>) => {
-    requestOrientationPermission();
-
     const p = physicsRef.current;
     const card = p[side];
     if (!card.isDragging) return;
@@ -298,93 +272,16 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
     if (leftCardRef.current) leftCardRef.current.style.transform = `rotate(${p.left.rest}deg)`;
     if (rightCardRef.current) rightCardRef.current.style.transform = `rotate(${p.right.rest}deg)`;
 
-    let lastMotionTime = 0;
-
-    // Primary: DeviceMotionEvent with accelerationIncludingGravity
-    // Provides exact gravity vector in screen plane with ZERO Euler gimbal lock in portrait mode
-    const handleMotion = (e: DeviceMotionEvent) => {
-      const acc = e.accelerationIncludingGravity;
-      if (!acc || acc.x === null || acc.y === null) return;
-
-      const now = performance.now();
-      if (now - lastMotionTime < 16) return;
-      lastMotionTime = now;
-
-      const ax = acc.x;
-      const ay = acc.y;
-
-      // Planar gravity angle in the phone's screen plane
-      const planarMag = Math.sqrt(ax * ax + ay * ay);
-      if (planarMag > 2.0) {
-        const angleRad = Math.atan2(-ax, -ay);
-        const angleDeg = angleRad * (180 / Math.PI);
-
-        // Clamped tilt response [-16°, +16°]
-        const clampedTilt = Math.max(-16, Math.min(16, angleDeg * 0.72));
-        if (Math.abs(clampedTilt - p.gyroTilt) > 0.12) {
-          p.hasHardwareGyro = true;
-          p.gyroTilt = clampedTilt;
-          startAnimation();
-        }
-      }
-    };
-
-    // Fallback: DeviceOrientationEvent
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      if (p.hasHardwareGyro) return;
-      if (e.gamma !== null && typeof e.gamma === 'number') {
-        const now = performance.now();
-        if (now - lastMotionTime < 16) return;
-        lastMotionTime = now;
-
-        const clampedTilt = Math.max(-16, Math.min(16, e.gamma * 0.7));
-        if (Math.abs(clampedTilt - p.gyroTilt) > 0.12) {
-          p.gyroTilt = clampedTilt;
-          startAnimation();
-        }
-      }
-    };
-
-    let listening = false;
-    const attachMotion = () => {
-      if (listening) return;
-      listening = true;
-      if (typeof window !== 'undefined') {
-        window.addEventListener('devicemotion', handleMotion, { passive: true });
-        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-      }
-    };
-
-    // Automatically attach listeners (works out of the box on Android & non-iOS)
-    attachMotion();
-
-    // On iOS Safari, request motion permission on first user tap/touch anywhere
-    const onFirstUserGesture = async () => {
-      await requestOrientationPermission();
-      attachMotion();
-    };
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('click', onFirstUserGesture, { once: true });
-      window.addEventListener('touchend', onFirstUserGesture, { once: true });
-    }
-
     return () => {
-      listening = false;
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('devicemotion', handleMotion);
-        window.removeEventListener('deviceorientation', handleOrientation);
-        window.removeEventListener('click', onFirstUserGesture);
-        window.removeEventListener('touchend', onFirstUserGesture);
-      }
       if (p.reqId) cancelAnimationFrame(p.reqId);
     };
   }, []);
 
    return <main className="pak-home">
-     <section className="home-banner" aria-labelledby="home-heading">
-       <Image className="home-banner-image" src={site.images.homeBannerImage || brand.heroImage} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="(max-width: 760px) 100vw, 72vw" priority />
-       <div className="home-banner-copy">
+      <section className="home-banner" aria-labelledby="home-heading">
+        <Image className="home-banner-image home-banner-desktop" src={site.images.homeBannerImage || "/brand/home-coffee-concept.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="72vw" priority />
+        <Image className="home-banner-image home-banner-mobile" src={(site.images as any).homeBannerMobileImage || "/brand/hero-drinks-final.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="100vw" priority />
+        <div className="home-banner-copy">
          <h1 id="home-heading">{site.copy["home-1"]}<br />{site.copy["home-2"]}</h1>
          <p>{site.copy["home-3"]}</p>
          <Link className="home-button" href="/menu">{site.copy["home-4"]}</Link>

@@ -6,6 +6,7 @@ export interface BrandConfig {
   websiteLineupImage?: string;
   menuHeroImage?: string;
   homeBannerImage?: string; 
+  homeBannerMobileImage?: string; 
   HeroImage3?: string;
   HeroImage4?: string;
   HeroImage5?: string;
