@@ -154,7 +154,7 @@ html.lenis{scroll-behavior:auto!important}
  .pak-home .home-banner .home-banner-image{left:-45%!important;right:auto!important;width:145%!important;max-width:none;object-fit:contain;object-position:right bottom}
 }
 .inner-page .story-photo-hero{display:flex;align-items:center;justify-content:center}
-@media(max-width:760px){.pak-home .home-banner .home-banner-image{left:0!important;width:100%!important;object-position:center bottom;transform:translateX(-20%) scale(1.4);transform-origin:center bottom}}
+@media(max-width:760px){.pak-home .home-banner .home-banner-image{left:0!important;width:100%!important;object-position:center bottom;transform:translateX(-20%) scale(1.4);transform-origin:center bottom;pointer-events:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-user-drag:none!important}}
 
 
 /* Desktop About only: artwork extends behind its transparent header. */

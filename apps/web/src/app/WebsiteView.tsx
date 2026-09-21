@@ -279,8 +279,8 @@ export function HomeView({initial,editing,orderUrl}:{initial:SiteDocument;editin
 
    return <main className="pak-home">
       <section className="home-banner" aria-labelledby="home-heading">
-        <Image className="home-banner-image home-banner-desktop" src={site.images.homeBannerImage || "/brand/home-coffee-concept.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="72vw" priority />
-        <Image className="home-banner-image home-banner-mobile" src={(site.images as any).homeBannerMobileImage || "/brand/hero-drinks-final.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="100vw" priority />
+        <Image className="home-banner-image home-banner-desktop" src={site.images.homeBannerImage || "/brand/home-coffee-concept.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="72vw" priority draggable={false} />
+        <Image className="home-banner-image home-banner-mobile" src={(site.images as any).homeBannerMobileImage || "/brand/hero-drinks-final.png"} alt="Illustrative Pak Kopi iced coffee and milk tea concept" fill sizes="100vw" priority draggable={false} />
         <div className="home-banner-copy">
          <h1 id="home-heading">{site.copy["home-1"]}<br />{site.copy["home-2"]}</h1>
          <p>{site.copy["home-3"]}</p>

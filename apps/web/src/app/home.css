@@ -44,7 +44,7 @@
 .home-link:hover{color:#80634f}
 
 .home-banner{position:relative;isolation:isolate;min-height:590px;height:min(48vw,700px);background:#faf9f6;overflow:hidden}
-.home-banner .home-banner-image{left:auto!important;width:72%!important;object-fit:cover;object-position:right bottom;z-index:-1}
+.home-banner .home-banner-image{left:auto!important;width:72%!important;object-fit:cover;object-position:right bottom;z-index:-1;pointer-events:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-user-drag:none!important}
 .home-banner .home-banner-desktop{display:block!important}
 .home-banner .home-banner-mobile{display:none!important}
 .home-banner-copy{padding:clamp(110px,12vw,185px) 6vw 80px;max-width:650px}
@@ -200,7 +200,7 @@
  .home-banner-copy{max-width:none;text-align:center;padding:48px 24px 25px}
  .home-banner h1{font-size:43px;line-height:1.1;margin-bottom:17px}
  .home-banner-copy p{max-width:260px;margin:0 auto 23px;font-size:15px}
- .home-banner .home-banner-image{top:auto!important;bottom:0!important;width:100%!important;height:330px!important;object-fit:cover;object-position:65.5% bottom}
+ .home-banner .home-banner-image{top:auto!important;bottom:0!important;width:100%!important;height:330px!important;object-fit:cover;object-position:65.5% bottom;pointer-events:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;-webkit-user-drag:none!important}
  .home-banner .home-banner-desktop{display:none!important}
  .home-banner .home-banner-mobile{display:block!important}
  .home-intro{padding:80px 20px 85px}
